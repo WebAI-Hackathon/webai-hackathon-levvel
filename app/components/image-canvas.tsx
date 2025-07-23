@@ -240,6 +240,16 @@ export default function ImageDropCanvas() {
                             ctx.fill();
                             ctx.stroke();
                         });
+                        // Draw rotate handle at bottom center (like text)
+                        const rotateHandleSize = 12;
+                        const rotateHandleX = layer.x + w / 2;
+                        const rotateHandleY = layer.y + h + 22;
+                        ctx.beginPath();
+                        ctx.arc(rotateHandleX, rotateHandleY, rotateHandleSize, 0, 2 * Math.PI);
+                        ctx.fillStyle = "#fff";
+                        ctx.strokeStyle = "#28a745";
+                        ctx.fill();
+                        ctx.stroke();
                         ctx.restore();
                     }
                 }
@@ -333,6 +343,7 @@ export default function ImageDropCanvas() {
         mouseY: number;
         startAngle: number;
         initialAngle: number;
+        layerType?: "text" | "image";
     } | null>(null);
 
     // Mouse event handlers for selecting, dragging, and resizing layers
@@ -388,7 +399,7 @@ export default function ImageDropCanvas() {
 
                 const { x: localMouseX, y: localMouseY } = getLocalMouseCoords(layer);
 
-                // 1. Check for rotate handle (text only for now)
+                // 1. Check for rotate handle (text and image)
                 if (layer.type === "text") {
                     const fontSize = layer.fontSize || 24;
                     const ctx = canvas.getContext("2d");
@@ -400,7 +411,7 @@ export default function ImageDropCanvas() {
                         setRotateHandleActive(true);
                         const cx = layer.x + textWidth / 2;
                         const cy = layer.y - fontSize / 2;
-                        const dx = mouseX - cx; // Use original mouse coords for angle calculation
+                        const dx = mouseX - cx;
                         const dy = mouseY - cy;
                         const initialAngle = Math.atan2(dy, dx) * 180 / Math.PI;
                         setRotateStart({
@@ -408,6 +419,30 @@ export default function ImageDropCanvas() {
                             mouseY,
                             startAngle: layer.rotation ?? 0,
                             initialAngle,
+                            layerType: "text",
+                        });
+                        return; // Found handle, stop processing
+                    }
+                }
+                if (layer.type === "image") {
+                    const w = layer.width || 100;
+                    const h = layer.height || 100;
+                    const rotateHandleX = layer.x + w / 2;
+                    const rotateHandleY = layer.y + h + 22;
+                    if (Math.abs(localMouseX - rotateHandleX) < 16 && Math.abs(localMouseY - rotateHandleY) < 16) {
+                        setRotateHandleActive(true);
+                        // Center of image
+                        const cx = layer.x + w / 2;
+                        const cy = layer.y + h / 2;
+                        const dx = mouseX - cx;
+                        const dy = mouseY - cy;
+                        const initialAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        setRotateStart({
+                            mouseX,
+                            mouseY,
+                            startAngle: layer.rotation ?? 0,
+                            initialAngle,
+                            layerType: "image",
                         });
                         return; // Found handle, stop processing
                     }
@@ -528,25 +563,39 @@ export default function ImageDropCanvas() {
                 return { x: localX, y: localY };
             };
 
-            // Rotate logic for text
+            // Rotate logic for text and image
             if (rotateHandleActive && selectedLayerId && rotateStart) {
                 setLayers(layers => layers.map(layer => {
-                    if (layer.id !== selectedLayerId || layer.type !== "text") return layer;
-                    // Center of text
-                    const fontSize = layer.fontSize || 24;
-                    const ctx = canvas.getContext("2d");
-                    ctx.font = `${fontSize}px sans-serif`;
-                    const textWidth = ctx.measureText(layer.content).width;
-                    const cx = layer.x + textWidth / 2;
-                    const cy = layer.y - fontSize / 2;
-                    // Calculate current angle from center to mouse
-                    const dx = mouseX - cx;
-                    const dy = mouseY - cy;
-                    const currentAngle = Math.atan2(dy, dx) * 180 / Math.PI;
-                    // Calculate delta from initial angle
-                    const deltaAngle = currentAngle - rotateStart.initialAngle;
-                    // Apply rotation relative to startAngle
-                    return { ...layer, rotation: rotateStart.startAngle + deltaAngle };
+                    if (layer.id !== selectedLayerId) return layer;
+                    if (rotateStart.layerType === "text" && layer.type === "text") {
+                        // Center of text
+                        const fontSize = layer.fontSize || 24;
+                        const ctx = canvas.getContext("2d");
+                        ctx.font = `${fontSize}px sans-serif`;
+                        const textWidth = ctx.measureText(layer.content).width;
+                        const cx = layer.x + textWidth / 2;
+                        const cy = layer.y - fontSize / 2;
+                        // Calculate current angle from center to mouse
+                        const dx = mouseX - cx;
+                        const dy = mouseY - cy;
+                        const currentAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        // Calculate delta from initial angle
+                        const deltaAngle = currentAngle - rotateStart.initialAngle;
+                        // Apply rotation relative to startAngle
+                        return { ...layer, rotation: rotateStart.startAngle + deltaAngle };
+                    }
+                    if (rotateStart.layerType === "image" && layer.type === "image") {
+                        const w = layer.width || 100;
+                        const h = layer.height || 100;
+                        const cx = layer.x + w / 2;
+                        const cy = layer.y + h / 2;
+                        const dx = mouseX - cx;
+                        const dy = mouseY - cy;
+                        const currentAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        const deltaAngle = currentAngle - rotateStart.initialAngle;
+                        return { ...layer, rotation: rotateStart.startAngle + deltaAngle };
+                    }
+                    return layer;
                 }));
                 return;
             }
