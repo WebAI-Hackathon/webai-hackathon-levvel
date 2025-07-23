@@ -21,6 +21,8 @@ interface Layer {
     opacity?: number;
     borderColor?: string;
     borderWidth?: number;
+    // Add rotation property to Layer
+    rotation?: number;
 }
 
 export default function ImageDropCanvas() {
@@ -109,7 +111,7 @@ export default function ImageDropCanvas() {
         setLayers(layers => layers.map(l => l.id === selectedLayerId ? { ...l, ...props } : l));
     };
 
-    // Draw all layers synchronously, with resize handles for selected layer
+    // Draw all layers synchronously, with resize/rotate handles for selected layer
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -118,6 +120,23 @@ export default function ImageDropCanvas() {
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         layers.forEach(layer => {
+            ctx.save();
+            // Apply rotation if set
+            const angle = (layer.rotation ?? 0) * Math.PI / 180;
+            let cx = layer.x, cy = layer.y;
+            if (layer.type === "image") {
+                cx += (layer.width || (imageCache[layer.content]?.width ?? 0)) / 2;
+                cy += (layer.height || (imageCache[layer.content]?.height ?? 0)) / 2;
+            } else if (layer.type === "text") {
+                ctx.font = `${layer.fontSize || 24}px ${layer.fontFamily || "sans-serif"}`;
+                const textWidth = ctx.measureText(layer.content).width;
+                cx += textWidth / 2;
+                cy -= (layer.fontSize || 24) / 2;
+            }
+            ctx.translate(cx, cy);
+            ctx.rotate(angle);
+            ctx.translate(-cx, -cy);
+            // Draw layer
             if (layer.type === "image") {
                 const img = imageCache[layer.content];
                 if (img) {
@@ -194,26 +213,37 @@ export default function ImageDropCanvas() {
                 // Draw improved resize handle if selected
                 if (layer.id === selectedLayerId) {
                     const fontSize = layer.fontSize || 24;
+                    const textWidth = ctx.measureText(layer.content).width;
                     ctx.save();
                     ctx.strokeStyle = "#007bff";
                     ctx.lineWidth = 2;
-                    const textWidth = ctx.measureText(layer.content).width;
                     ctx.setLineDash([4, 2]);
                     ctx.strokeRect(layer.x, layer.y - fontSize, textWidth, fontSize);
                     ctx.setLineDash([]);
-                    // Draw larger handle at right-middle
-                    const handleSize = 14;
-                    const handleX = layer.x + textWidth + 8;
-                    const handleY = layer.y - fontSize / 2;
+                    // Draw larger handle at right-middle for resize
+                    const resizeHandleSize = 14;
+                    const resizeHandleX = layer.x + textWidth + 8;
+                    const resizeHandleY = layer.y - fontSize / 2;
                     ctx.beginPath();
-                    ctx.arc(handleX, handleY, handleSize, 0, 2 * Math.PI);
+                    ctx.arc(resizeHandleX, resizeHandleY, resizeHandleSize, 0, 2 * Math.PI);
                     ctx.fillStyle = "#fff";
                     ctx.strokeStyle = "#007bff";
+                    ctx.fill();
+                    ctx.stroke();
+                    // Draw rotate handle at bottom center
+                    const rotateHandleSize = 12;
+                    const rotateHandleX = layer.x + textWidth / 2;
+                    const rotateHandleY = layer.y + 18;
+                    ctx.beginPath();
+                    ctx.arc(rotateHandleX, rotateHandleY, rotateHandleSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = "#fff";
+                    ctx.strokeStyle = "#28a745";
                     ctx.fill();
                     ctx.stroke();
                     ctx.restore();
                 }
             }
+            ctx.restore();
         });
         // If resizing text, show preview line for new font size
         if (resizeHandle && selectedLayerId) {
@@ -234,6 +264,10 @@ export default function ImageDropCanvas() {
         }
     }, [layers, imageCache, bgColor, selectedLayerId, resizeHandle]);
 
+    // Add rotate handle logic
+    const [rotateHandleActive, setRotateHandleActive] = useState(false);
+    const [rotateStart, setRotateStart] = useState<{mouseX: number; mouseY: number; startAngle: number} | null>(null);
+
     // Mouse event handlers for selecting, dragging, and resizing layers
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -245,6 +279,23 @@ export default function ImageDropCanvas() {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
+            // Check rotate handle for text FIRST
+            for (let i = layers.length - 1; i >= 0; i--) {
+                const layer = layers[i];
+                if (layer.id === selectedLayerId && layer.type === "text") {
+                    const fontSize = layer.fontSize || 24;
+                    const ctx = canvas.getContext("2d");
+                    ctx.font = `${fontSize}px sans-serif`;
+                    const textWidth = ctx.measureText(layer.content).width;
+                    const rotateHandleX = layer.x + textWidth / 2;
+                    const rotateHandleY = layer.y + 18;
+                    if (Math.abs(mouseX - rotateHandleX) < 16 && Math.abs(mouseY - rotateHandleY) < 16) {
+                        setRotateHandleActive(true);
+                        setRotateStart({ mouseX, mouseY, startAngle: layer.rotation ?? 0 });
+                        return; // Prevent deselection
+                    }
+                }
+            }
             // Check resize handles first
             for (let i = layers.length - 1; i >= 0; i--) {
                 const layer = layers[i];
@@ -325,6 +376,25 @@ export default function ImageDropCanvas() {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
+            // Rotate logic for text
+            if (rotateHandleActive && selectedLayerId && rotateStart) {
+                setLayers(layers => layers.map(layer => {
+                    if (layer.id !== selectedLayerId || layer.type !== "text") return layer;
+                    // Center of text
+                    const fontSize = layer.fontSize || 24;
+                    const ctx = canvas.getContext("2d");
+                    ctx.font = `${fontSize}px sans-serif`;
+                    const textWidth = ctx.measureText(layer.content).width;
+                    const cx = layer.x + textWidth / 2;
+                    const cy = layer.y - fontSize / 2;
+                    // Calculate angle from center to mouse
+                    const dx = mouseX - cx;
+                    const dy = mouseY - cy;
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    return { ...layer, rotation: angle };
+                }));
+                return;
+            }
             // Improved text resize logic
             if (resizeHandle && selectedLayerId) {
                 setLayers(layers => layers.map(layer => {
@@ -376,6 +446,8 @@ export default function ImageDropCanvas() {
             setDragOffset(null);
             setResizeHandle(null);
             setResizeStart(null);
+            setRotateHandleActive(false);
+            setRotateStart(null);
         };
 
         canvas.addEventListener("mousedown", handleMouseDown);
@@ -386,7 +458,7 @@ export default function ImageDropCanvas() {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [layers, draggedLayerId, dragOffset, selectedLayerId, resizeHandle, resizeStart]);
+    }, [layers, draggedLayerId, dragOffset, selectedLayerId, resizeHandle, resizeStart, rotateHandleActive, rotateStart]);
 
     // Download canvas as image
     const handleDownload = () => {
@@ -545,51 +617,56 @@ export default function ImageDropCanvas() {
                 {selectedLayerId ? (() => {
                     const layer = getLayerById(selectedLayerId);
                     if (!layer) return null;
-                    if (layer.type === "text") {
-                        return (
-                            <div>
-                                <div style={{ marginBottom: 8 }}>
-                                    <label style={{ fontSize: 13 }}>Text Color:</label>
-                                    <input type="color" value={layer.color || "#222"} onChange={e => updateSelectedLayer({ color: e.target.value })} style={{ marginLeft: 8 }} />
-                                </div>
-                                <div style={{ marginBottom: 8 }}>
-                                    <label style={{ fontSize: 13 }}>Font:</label>
-                                    <select value={layer.fontFamily || "sans-serif"} onChange={e => updateSelectedLayer({ fontFamily: e.target.value })} style={{ marginLeft: 8 }}>
-                                        <option value="sans-serif">Sans</option>
-                                        <option value="serif">Serif</option>
-                                        <option value="monospace">Mono</option>
-                                        <option value="cursive">Cursive</option>
-                                        <option value="fantasy">Fantasy</option>
-                                    </select>
-                                </div>
-                                <div style={{ marginBottom: 8 }}>
-                                    <label style={{ fontSize: 13 }}>Style:</label>
-                                    <button onClick={() => updateSelectedLayer({ bold: !layer.bold })} style={{ fontWeight: "bold", marginLeft: 8, background: layer.bold ? "#007bff" : "#eee", color: layer.bold ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>B</button>
-                                    <button onClick={() => updateSelectedLayer({ italic: !layer.italic })} style={{ fontStyle: "italic", marginLeft: 4, background: layer.italic ? "#007bff" : "#eee", color: layer.italic ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>I</button>
-                                    <button onClick={() => updateSelectedLayer({ underline: !layer.underline })} style={{ textDecoration: "underline", marginLeft: 4, background: layer.underline ? "#007bff" : "#eee", color: layer.underline ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>U</button>
-                                    <button onClick={() => updateSelectedLayer({ strikethrough: !layer.strikethrough })} style={{ textDecoration: "line-through", marginLeft: 4, background: layer.strikethrough ? "#007bff" : "#eee", color: layer.strikethrough ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>S</button>
-                                </div>
+                    return (
+                        <div>
+                            {layer.type === "text" && (
+                                <>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <label style={{ fontSize: 13 }}>Text Color:</label>
+                                        <input type="color" value={layer.color || "#222"} onChange={e => updateSelectedLayer({ color: e.target.value })} style={{ marginLeft: 8 }} />
+                                    </div>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <label style={{ fontSize: 13 }}>Font:</label>
+                                        <select value={layer.fontFamily || "sans-serif"} onChange={e => updateSelectedLayer({ fontFamily: e.target.value })} style={{ marginLeft: 8 }}>
+                                            <option value="sans-serif">Sans</option>
+                                            <option value="serif">Serif</option>
+                                            <option value="monospace">Mono</option>
+                                            <option value="cursive">Cursive</option>
+                                            <option value="fantasy">Fantasy</option>
+                                        </select>
+                                    </div>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <label style={{ fontSize: 13 }}>Style:</label>
+                                        <button onClick={() => updateSelectedLayer({ bold: !layer.bold })} style={{ fontWeight: "bold", marginLeft: 8, background: layer.bold ? "#007bff" : "#eee", color: layer.bold ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>B</button>
+                                        <button onClick={() => updateSelectedLayer({ italic: !layer.italic })} style={{ fontStyle: "italic", marginLeft: 4, background: layer.italic ? "#007bff" : "#eee", color: layer.italic ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>I</button>
+                                        <button onClick={() => updateSelectedLayer({ underline: !layer.underline })} style={{ textDecoration: "underline", marginLeft: 4, background: layer.underline ? "#007bff" : "#eee", color: layer.underline ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>U</button>
+                                        <button onClick={() => updateSelectedLayer({ strikethrough: !layer.strikethrough })} style={{ textDecoration: "line-through", marginLeft: 4, background: layer.strikethrough ? "#007bff" : "#eee", color: layer.strikethrough ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>S</button>
+                                    </div>
+                                </>
+                            )}
+                            {layer.type === "image" && (
+                                <>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <label style={{ fontSize: 13 }}>Opacity:</label>
+                                        <input type="range" min={0.1} max={1} step={0.01} value={layer.opacity ?? 1} onChange={e => updateSelectedLayer({ opacity: Number(e.target.value) })} style={{ marginLeft: 8 }} />
+                                    </div>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <label style={{ fontSize: 13 }}>Border Color:</label>
+                                        <input type="color" value={layer.borderColor || "#000"} onChange={e => updateSelectedLayer({ borderColor: e.target.value })} style={{ marginLeft: 8 }} />
+                                    </div>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <label style={{ fontSize: 13 }}>Border Width:</label>
+                                        <input type="number" min={0} max={20} value={layer.borderWidth ?? 0} onChange={e => updateSelectedLayer({ borderWidth: Number(e.target.value) })} style={{ marginLeft: 8, width: 50 }} />
+                                    </div>
+                                </>
+                            )}
+                            <div style={{ marginBottom: 8 }}>
+                                <label style={{ fontSize: 13 }}>Rotation:</label>
+                                <input type="range" min={-180} max={180} step={1} value={layer.rotation ?? 0} onChange={e => updateSelectedLayer({ rotation: Number(e.target.value) })} style={{ marginLeft: 8, width: 120 }} />
+                                <span style={{ marginLeft: 8 }}>{layer.rotation ?? 0}°</span>
                             </div>
-                        );
-                    } else if (layer.type === "image") {
-                        return (
-                            <div>
-                                <div style={{ marginBottom: 8 }}>
-                                    <label style={{ fontSize: 13 }}>Opacity:</label>
-                                    <input type="range" min={0.1} max={1} step={0.01} value={layer.opacity ?? 1} onChange={e => updateSelectedLayer({ opacity: Number(e.target.value) })} style={{ marginLeft: 8 }} />
-                                </div>
-                                <div style={{ marginBottom: 8 }}>
-                                    <label style={{ fontSize: 13 }}>Border Color:</label>
-                                    <input type="color" value={layer.borderColor || "#000"} onChange={e => updateSelectedLayer({ borderColor: e.target.value })} style={{ marginLeft: 8 }} />
-                                </div>
-                                <div style={{ marginBottom: 8 }}>
-                                    <label style={{ fontSize: 13 }}>Border Width:</label>
-                                    <input type="number" min={0} max={20} value={layer.borderWidth ?? 0} onChange={e => updateSelectedLayer({ borderWidth: Number(e.target.value) })} style={{ marginLeft: 8, width: 50 }} />
-                                </div>
-                            </div>
-                        );
-                    }
-                    return null;
+                        </div>
+                    );
                 })() : <div style={{ color: "#888" }}>Select a layer to edit</div>}
             </div>
         </div>
