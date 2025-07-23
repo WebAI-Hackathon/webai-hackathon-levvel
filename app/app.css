@@ -13,3 +13,8 @@ body {
     color-scheme: dark;
   }
 }
+
+/* index.css or global styles */
+tool, prop, context, array, dict {
+  display: none;
+}

@@ -1,4 +1,4 @@
-import {forwardRef, useEffect, type DragEvent} from "react";
+import {type DragEvent, forwardRef, useEffect} from "react";
 import {type Layer} from "./types";
 
 interface CanvasProps {
@@ -6,10 +6,62 @@ interface CanvasProps {
     setLayers: (layers: Layer[]) => void;
     bgColor: string;
     selectedLayerId: string | null;
-    imageCache: {[src: string]: HTMLImageElement};
+    imageCache: { [src: string]: HTMLImageElement };
 }
 
-export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({layers, setLayers, bgColor, selectedLayerId, imageCache}, ref) => {
+const OPENAI_API_KEY = 'sk-6fxih0xp5IOxgF6xfIlzrA'; // Replace with your API key
+
+async function generateImageDescription(image: string) {
+    try {
+        const response = await fetch('https://api.litviva.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${OPENAI_API_KEY}`
+            },
+            body: JSON.stringify({
+                model: 'hackathon/vlm',
+                messages: [
+                    {
+                        role: 'system',
+                        content: 'You are a helpful assistant that describes images.'
+                    },
+                    {
+                        role: 'user',
+                        content: [
+                            {type: "text", text: "whats in this image?"},
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": image,
+                                }
+                            }
+                        ],
+                    },
+                ],
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error?.message || response.statusText);
+        }
+
+        const data = await response.json();
+        const message = data.choices[0]?.message.content;
+        return message || "No description available.";
+    } catch (err) {
+        throw err;
+    }
+}
+
+export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({
+                                                                      layers,
+                                                                      setLayers,
+                                                                      bgColor,
+                                                                      selectedLayerId,
+                                                                      imageCache
+                                                                  }, ref) => {
 
     const handleDrop = (e: DragEvent<HTMLDivElement>) => {
         e.preventDefault();
@@ -18,18 +70,27 @@ export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({layers, setLa
             const reader = new FileReader();
             reader.onload = function (event) {
                 const imgSrc = event.target?.result as string;
-                setLayers([
+                const newLayerId = Math.random().toString(36).slice(2);
+                const newLayers = [
                     ...layers,
                     {
-                        id: Math.random().toString(36).slice(2),
+                        id: newLayerId,
                         type: "image",
                         content: imgSrc,
                         x: 10,
                         y: 10,
                         width: 200,
                         height: 150,
-                    },
-                ]);
+                    } as Layer,
+                ];
+                setLayers(newLayers);
+
+                generateImageDescription(imgSrc).then((description) => {
+                    setLayers(newLayers.map(layer => layer.id === newLayerId ? {
+                        ...layer,
+                        layerDescription: description
+                    } : layer));
+                });
             };
             reader.readAsDataURL(file);
         }
@@ -205,45 +266,51 @@ export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({layers, setLa
     }, [layers, imageCache, bgColor, selectedLayerId, ref]);
 
     return (
-        <div
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            style={{
-                border: "2px dashed #aaa",
-                borderRadius: 8,
-                width: 400,
-                height: 340,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "2rem auto",
-                background: "#fafafa",
-                position: "relative",
-            }}
-        >
-            <canvas
-                ref={ref}
-                width={380}
-                height={280}
-                style={{ background: "#fff", borderRadius: 4 }}
-            />
-            {layers.length === 0 && (
-                <span
-                    style={{
-                        position: "absolute",
-                        top: 120,
-                        left: 0,
-                        right: 0,
-                        color: "#888",
-                        pointerEvents: "none",
-                        textAlign: "center",
-                    }}
-                >
+        <>
+            {layers.filter((layer) => ((layer.type === "image" ? layer.layerDescription : layer.content)?.trim() || "").length > 0).length !== 0 && (
+                <context name="Canvas Content">
+                    {layers.map((layer, index) => `Layer ${index + 1} ` + (layer.type === "image" ? "(Image)" : "(Text)") + ": " + (layer.type === "image" ? layer.layerDescription : layer.content)).join("\n")}
+                </context>)}
+            <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                style={{
+                    border: "2px dashed #aaa",
+                    borderRadius: 8,
+                    width: 400,
+                    height: 340,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "2rem auto",
+                    background: "#fafafa",
+                    position: "relative",
+                }}
+            >
+                <canvas
+                    ref={ref}
+                    width={380}
+                    height={280}
+                    style={{background: "#fff", borderRadius: 4}}
+                />
+                {layers.length === 0 && (
+                    <span
+                        style={{
+                            position: "absolute",
+                            top: 120,
+                            left: 0,
+                            right: 0,
+                            color: "#888",
+                            pointerEvents: "none",
+                            textAlign: "center",
+                        }}
+                    >
                     Drag and drop an image or add text layer
                 </span>
-            )}
-        </div>
+                )}
+            </div>
+        </>
     );
 });
 

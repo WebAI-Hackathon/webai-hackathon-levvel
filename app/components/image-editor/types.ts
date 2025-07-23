@@ -20,5 +20,6 @@ export interface Layer {
     borderWidth?: number;
     borderRadius?: number;
     rotation?: number;
+    layerDescription?: string;
 }
 
