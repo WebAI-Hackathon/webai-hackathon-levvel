@@ -760,10 +760,18 @@ export default function ImageDropCanvas() {
     const handleDownload = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
-        const link = document.createElement('a');
-        link.download = 'canvas.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        // Temporarily deselect layer to hide handles
+        const prevSelected = selectedLayerId;
+        setSelectedLayerId(null);
+        // Wait for canvas to redraw without selection
+        setTimeout(() => {
+            const link = document.createElement('a');
+            link.download = 'canvas.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            // Restore selection after download
+            setSelectedLayerId(prevSelected);
+        }, 30);
     };
 
     // Move layer up/down in the stack
