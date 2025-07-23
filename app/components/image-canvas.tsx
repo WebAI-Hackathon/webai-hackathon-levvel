@@ -85,16 +85,22 @@ export default function ImageDropCanvas() {
         });
     }, [layers, imageCache]);
 
-    // Draw all layers synchronously
+    const [selectedLayerId, setSelectedLayerId] = useState<string | null>(null);
+    const [resizeHandle, setResizeHandle] = useState<null | {corner: string}> (null);
+    // Store initial mouse X and font size for text resizing
+    const [resizeStart, setResizeStart] = useState<{mouseX: number; fontSize: number} | null>(null);
+
+    // Helper: get layer by id
+    const getLayerById = (id: string | null) => layers.find(l => l.id === id);
+
+    // Draw all layers synchronously, with resize handles for selected layer
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
-        // Fill background with selected color
         ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // Draw all layers in order (topmost last)
         layers.forEach(layer => {
             if (layer.type === "image") {
                 const img = imageCache[layer.content];
@@ -106,25 +112,129 @@ export default function ImageDropCanvas() {
                         layer.width || img.width,
                         layer.height || img.height
                     );
+                    // Draw resize handles if selected
+                    if (layer.id === selectedLayerId) {
+                        const w = layer.width || img.width;
+                        const h = layer.height || img.height;
+                        ctx.save();
+                        ctx.strokeStyle = "#007bff";
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(layer.x, layer.y, w, h);
+                        // Draw handles (corners)
+                        const handleSize = 8;
+                        const handles = [
+                            [layer.x, layer.y],
+                            [layer.x + w, layer.y],
+                            [layer.x, layer.y + h],
+                            [layer.x + w, layer.y + h],
+                        ];
+                        ctx.fillStyle = "#fff";
+                        ctx.strokeStyle = "#007bff";
+                        handles.forEach(([hx, hy]) => {
+                            ctx.beginPath();
+                            ctx.arc(hx, hy, handleSize, 0, 2 * Math.PI);
+                            ctx.fill();
+                            ctx.stroke();
+                        });
+                        ctx.restore();
+                    }
                 }
             } else if (layer.type === "text") {
                 ctx.font = `${layer.fontSize || 24}px sans-serif`;
                 ctx.fillStyle = "#222";
                 ctx.fillText(layer.content, layer.x, layer.y);
+                // Draw improved resize handle if selected
+                if (layer.id === selectedLayerId) {
+                    const fontSize = layer.fontSize || 24;
+                    ctx.save();
+                    ctx.strokeStyle = "#007bff";
+                    ctx.lineWidth = 2;
+                    const textWidth = ctx.measureText(layer.content).width;
+                    ctx.setLineDash([4, 2]);
+                    ctx.strokeRect(layer.x, layer.y - fontSize, textWidth, fontSize);
+                    ctx.setLineDash([]);
+                    // Draw larger handle at right-middle
+                    const handleSize = 14;
+                    const handleX = layer.x + textWidth + 8;
+                    const handleY = layer.y - fontSize / 2;
+                    ctx.beginPath();
+                    ctx.arc(handleX, handleY, handleSize, 0, 2 * Math.PI);
+                    ctx.fillStyle = "#fff";
+                    ctx.strokeStyle = "#007bff";
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.restore();
+                }
             }
         });
-    }, [layers, imageCache, bgColor]);
+        // If resizing text, show preview line for new font size
+        if (resizeHandle && selectedLayerId) {
+            const layer = getLayerById(selectedLayerId);
+            if (layer && layer.type === "text" && resizeHandle.corner === "right") {
+                ctx.save();
+                ctx.strokeStyle = "#007bff";
+                ctx.setLineDash([2, 2]);
+                ctx.lineWidth = 1.5;
+                ctx.font = `${layer.fontSize || 24}px sans-serif`;
+                const textWidth = ctx.measureText(layer.content).width;
+                ctx.beginPath();
+                ctx.moveTo(layer.x, layer.y - (layer.fontSize || 24));
+                ctx.lineTo(layer.x + textWidth, layer.y - (layer.fontSize || 24));
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+    }, [layers, imageCache, bgColor, selectedLayerId, resizeHandle]);
 
-    // Mouse event handlers for dragging any layer
+    // Mouse event handlers for selecting, dragging, and resizing layers
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
+
+        let resizing = false;
 
         const handleMouseDown = (e: MouseEvent) => {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
-            // Find topmost layer under mouse (text or image)
+            // Check resize handles first
+            for (let i = layers.length - 1; i >= 0; i--) {
+                const layer = layers[i];
+                if (layer.id === selectedLayerId) {
+                    if (layer.type === "image") {
+                        const w = layer.width || 100;
+                        const h = layer.height || 100;
+                        const handles = [
+                            {corner: "tl", x: layer.x, y: layer.y},
+                            {corner: "tr", x: layer.x + w, y: layer.y},
+                            {corner: "bl", x: layer.x, y: layer.y + h},
+                            {corner: "br", x: layer.x + w, y: layer.y + h},
+                        ];
+                        for (const handle of handles) {
+                            if (Math.abs(mouseX - handle.x) < 12 && Math.abs(mouseY - handle.y) < 12) {
+                                setResizeHandle({corner: handle.corner});
+                                resizing = true;
+                                return;
+                            }
+                        }
+                    } else if (layer.type === "text") {
+                        const fontSize = layer.fontSize || 24;
+                        const ctx = canvas.getContext("2d");
+                        ctx.font = `${fontSize}px sans-serif`;
+                        const textWidth = ctx.measureText(layer.content).width;
+                        // Improved: right-middle handle for text
+                        const handleX = layer.x + textWidth + 8;
+                        const handleY = layer.y - fontSize / 2;
+                        if (Math.abs(mouseX - handleX) < 18 && Math.abs(mouseY - handleY) < 18) {
+                            setResizeHandle({corner: "right"});
+                            setResizeStart({ mouseX, fontSize });
+                            resizing = true;
+                            return;
+                        }
+                    }
+                }
+            }
+            // If not resizing, check for layer selection/dragging
             for (let i = layers.length - 1; i >= 0; i--) {
                 const layer = layers[i];
                 if (layer.type === "text") {
@@ -139,6 +249,7 @@ export default function ImageDropCanvas() {
                         mouseY >= layer.y - textHeight &&
                         mouseY <= layer.y
                     ) {
+                        setSelectedLayerId(layer.id);
                         setDraggedLayerId(layer.id);
                         setDragOffset({ x: mouseX - layer.x, y: mouseY - layer.y });
                         return;
@@ -152,31 +263,71 @@ export default function ImageDropCanvas() {
                         mouseY >= layer.y &&
                         mouseY <= layer.y + height
                     ) {
+                        setSelectedLayerId(layer.id);
                         setDraggedLayerId(layer.id);
                         setDragOffset({ x: mouseX - layer.x, y: mouseY - layer.y });
                         return;
                     }
                 }
             }
+            setSelectedLayerId(null);
         };
 
         const handleMouseMove = (e: MouseEvent) => {
-            if (!draggedLayerId || !dragOffset) return;
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
-            setLayers(layers =>
-                layers.map(layer =>
-                    layer.id === draggedLayerId
-                        ? { ...layer, x: mouseX - dragOffset.x, y: mouseY - dragOffset.y }
-                        : layer
-                )
-            );
+            // Improved text resize logic
+            if (resizeHandle && selectedLayerId) {
+                setLayers(layers => layers.map(layer => {
+                    if (layer.id !== selectedLayerId) return layer;
+                    if (layer.type === "image") {
+                        let newX = layer.x, newY = layer.y, newW = layer.width || 100, newH = layer.height || 100;
+                        if (resizeHandle.corner === "br") {
+                            newW = Math.max(10, mouseX - layer.x);
+                            newH = Math.max(10, mouseY - layer.y);
+                        } else if (resizeHandle.corner === "tr") {
+                            newW = Math.max(10, mouseX - layer.x);
+                            newY = mouseY;
+                            newH = Math.max(10, layer.y + (layer.height || 100) - mouseY);
+                        } else if (resizeHandle.corner === "bl") {
+                            newX = mouseX;
+                            newW = Math.max(10, layer.x + (layer.width || 100) - mouseX);
+                            newH = Math.max(10, mouseY - layer.y);
+                        } else if (resizeHandle.corner === "tl") {
+                            newX = mouseX;
+                            newY = mouseY;
+                            newW = Math.max(10, layer.x + (layer.width || 100) - mouseX);
+                            newH = Math.max(10, layer.y + (layer.height || 100) - mouseY);
+                        }
+                        return { ...layer, x: newX, y: newY, width: newW, height: newH };
+                    } else if (layer.type === "text" && resizeHandle.corner === "right" && resizeStart) {
+                        // Calculate new font size based on horizontal drag from initial mouseX
+                        const deltaX = mouseX - resizeStart.mouseX;
+                        const fontSize = Math.max(8, resizeStart.fontSize + deltaX / 2);
+                        return { ...layer, fontSize };
+                    }
+                    return layer;
+                }));
+                return;
+            }
+            // Drag logic
+            if (draggedLayerId && dragOffset) {
+                setLayers(layers =>
+                    layers.map(layer =>
+                        layer.id === draggedLayerId
+                            ? { ...layer, x: mouseX - dragOffset.x, y: mouseY - dragOffset.y }
+                            : layer
+                    )
+                );
+            }
         };
 
         const handleMouseUp = () => {
             setDraggedLayerId(null);
             setDragOffset(null);
+            setResizeHandle(null);
+            setResizeStart(null);
         };
 
         canvas.addEventListener("mousedown", handleMouseDown);
@@ -187,7 +338,7 @@ export default function ImageDropCanvas() {
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [layers, draggedLayerId, dragOffset]);
+    }, [layers, draggedLayerId, dragOffset, selectedLayerId, resizeHandle, resizeStart]);
 
     // Download canvas as image
     const handleDownload = () => {
