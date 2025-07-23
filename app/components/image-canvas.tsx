@@ -860,7 +860,7 @@ export default function ImageDropCanvas() {
             }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>Layers</div>
                 {layers.length === 0 && <div style={{ color: "#888" }}>No layers</div>}
-                {layers.reverse().map((layer, idx) => (
+                {[...layers].reverse().map((layer, idx) => (
                     <div key={layer.id} style={{
                         display: "flex",
                         alignItems: "center",
