@@ -90,7 +90,9 @@ export default function ImageDropCanvas() {
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Fill white background
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         // Draw image layers from cache
         layers.filter(l => l.type === "image").forEach(layer => {
             const img = imageCache[layer.content];
@@ -186,6 +188,16 @@ export default function ImageDropCanvas() {
         };
     }, [layers, draggedLayerId, dragOffset]);
 
+    // Download canvas as image
+    const handleDownload = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+        const link = document.createElement('a');
+        link.download = 'canvas.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    };
+
     return (
         <div
             onDrop={handleDrop}
@@ -223,6 +235,12 @@ export default function ImageDropCanvas() {
                     style={{ marginLeft: 8, padding: "4px 12px", borderRadius: 4, border: "none", background: "#007bff", color: "#fff" }}
                 >
                     Add Text
+                </button>
+                <button
+                    onClick={handleDownload}
+                    style={{ marginLeft: 8, padding: "4px 12px", borderRadius: 4, border: "none", background: "#28a745", color: "#fff" }}
+                >
+                    Download Image
                 </button>
             </div>
             {layers.length === 0 && (
