@@ -21,6 +21,7 @@ interface Layer {
     opacity?: number;
     borderColor?: string;
     borderWidth?: number;
+    borderRadius?: number; // Add this line
     // Add rotation property to Layer
     rotation?: number;
 }
@@ -166,17 +167,53 @@ export default function ImageDropCanvas() {
                 if (img) {
                     ctx.save();
                     ctx.globalAlpha = layer.opacity ?? 1;
+                    // Draw rounded rect if borderRadius is set
+                    const w = layer.width || img.width;
+                    const h = layer.height || img.height;
+                    const r = layer.borderRadius ?? 0;
+                    if (r > 0) {
+                        ctx.beginPath();
+                        // Rounded rect path
+                        ctx.moveTo(layer.x + r, layer.y);
+                        ctx.lineTo(layer.x + w - r, layer.y);
+                        ctx.quadraticCurveTo(layer.x + w, layer.y, layer.x + w, layer.y + r);
+                        ctx.lineTo(layer.x + w, layer.y + h - r);
+                        ctx.quadraticCurveTo(layer.x + w, layer.y + h, layer.x + w - r, layer.y + h);
+                        ctx.lineTo(layer.x + r, layer.y + h);
+                        ctx.quadraticCurveTo(layer.x, layer.y + h, layer.x, layer.y + h - r);
+                        ctx.lineTo(layer.x, layer.y + r);
+                        ctx.quadraticCurveTo(layer.x, layer.y, layer.x + r, layer.y);
+                        ctx.closePath();
+                        ctx.clip();
+                    }
                     ctx.drawImage(
                         img,
                         layer.x,
                         layer.y,
-                        layer.width || img.width,
-                        layer.height || img.height
+                        w,
+                        h
                     );
                     if (layer.borderWidth && layer.borderWidth > 0) {
+                        ctx.save();
                         ctx.strokeStyle = layer.borderColor || "#000";
                         ctx.lineWidth = layer.borderWidth;
-                        ctx.strokeRect(layer.x, layer.y, layer.width || img.width, layer.height || img.height);
+                        if (r > 0) {
+                            ctx.beginPath();
+                            ctx.moveTo(layer.x + r, layer.y);
+                            ctx.lineTo(layer.x + w - r, layer.y);
+                            ctx.quadraticCurveTo(layer.x + w, layer.y, layer.x + w, layer.y + r);
+                            ctx.lineTo(layer.x + w, layer.y + h - r);
+                            ctx.quadraticCurveTo(layer.x + w, layer.y + h, layer.x + w - r, layer.y + h);
+                            ctx.lineTo(layer.x + r, layer.y + h);
+                            ctx.quadraticCurveTo(layer.x, layer.y + h, layer.x, layer.y + h - r);
+                            ctx.lineTo(layer.x, layer.y + r);
+                            ctx.quadraticCurveTo(layer.x, layer.y, layer.x + r, layer.y);
+                            ctx.closePath();
+                            ctx.stroke();
+                        } else {
+                            ctx.strokeRect(layer.x, layer.y, w, h);
+                        }
+                        ctx.restore();
                     }
                     ctx.restore();
                     // Draw resize handles if selected
@@ -717,6 +754,18 @@ export default function ImageDropCanvas() {
                                     <div style={{ marginBottom: 8 }}>
                                         <label style={{ fontSize: 13 }}>Border Width:</label>
                                         <input type="number" min={0} max={20} value={layer.borderWidth ?? 0} onChange={e => updateSelectedLayer({ borderWidth: Number(e.target.value) })} style={{ marginLeft: 8, width: 50 }} />
+                                    </div>
+                                    <div style={{ marginBottom: 8 }}>
+                                        <label style={{ fontSize: 13 }}>Border Radius:</label>
+                                        <input
+                                            type="number"
+                                            min={0}
+                                            max={Math.min(layer.width ?? 200, layer.height ?? 150) / 2}
+                                            value={layer.borderRadius ?? 0}
+                                            onChange={e => updateSelectedLayer({ borderRadius: Number(e.target.value) })}
+                                            style={{ marginLeft: 8, width: 50 }}
+                                        />
+                                        <span style={{ marginLeft: 8 }}>px</span>
                                     </div>
                                 </>
                             )}
