@@ -44,6 +44,15 @@ export function EditPanel({ selectedLayer, updateSelectedLayer, rotationInput, s
                 {selectedLayer.type === "text" && (
                     <>
                         <div style={{ marginBottom: 8 }}>
+                            <label style={{ fontSize: 13 }}>Text:</label>
+                            <input
+                                type="text"
+                                value={selectedLayer.content}
+                                onChange={e => updateSelectedLayer({ content: e.target.value })}
+                                style={{ marginLeft: 8, width: 140 }}
+                            />
+                        </div>
+                        <div style={{ marginBottom: 8 }}>
                             <label style={{ fontSize: 13 }}>Text Color:</label>
                             <input type="color" value={selectedLayer.color || "#222"} onChange={e => updateSelectedLayer({ color: e.target.value })} style={{ marginLeft: 8 }} />
                         </div>
@@ -127,4 +136,3 @@ export function EditPanel({ selectedLayer, updateSelectedLayer, rotationInput, s
         </div>
     );
 }
-

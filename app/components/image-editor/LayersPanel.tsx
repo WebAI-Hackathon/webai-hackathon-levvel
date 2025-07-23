@@ -46,17 +46,18 @@ export function LayersPanel({ layers, draggedLayerId, moveLayer, deleteLayer }: 
                         </div>
                         <div style={{ display: "flex", flexDirection: "column", marginLeft: 8 }}>
                             <button
-                                onClick={() => moveLayer(originalIndex, "up")}
-                                disabled={originalIndex === 0}
-                                style={{ fontSize: 12, marginBottom: 2, background: "#eee", border: "none", borderRadius: 3, cursor: originalIndex === 0 ? "not-allowed" : "pointer" }}
-                                title="Move up"
-                            >↑</button>
-                            <button
                                 onClick={() => moveLayer(originalIndex, "down")}
                                 disabled={originalIndex === layers.length - 1}
                                 style={{ fontSize: 12, background: "#eee", border: "none", borderRadius: 3, cursor: originalIndex === layers.length - 1 ? "not-allowed" : "pointer" }}
                                 title="Move down"
+                            >↑</button>
+                            <button
+                                onClick={() => moveLayer(originalIndex, "up")}
+                                disabled={originalIndex === 0}
+                                style={{ fontSize: 12, marginBottom: 2, background: "#eee", border: "none", borderRadius: 3, cursor: originalIndex === 0 ? "not-allowed" : "pointer" }}
+                                title="Move up"
                             >↓</button>
+
                             <button
                                 onClick={() => deleteLayer(layer.id)}
                                 style={{
