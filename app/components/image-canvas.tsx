@@ -103,13 +103,37 @@ export default function ImageDropCanvas() {
     // Store initial mouse X and font size for text resizing
     const [resizeStart, setResizeStart] = useState<{mouseX: number; fontSize: number} | null>(null);
 
+    // Add local state for rotation input
+    const [rotationInput, setRotationInput] = useState<string>("");
+
     // Helper: get layer by id
     const getLayerById = (id: string | null) => layers.find(l => l.id === id);
 
-    // Helper: update selected layer
+    // Helper: update selected layer and sync rotation input only for rotation
     const updateSelectedLayer = (props: Partial<Layer>) => {
         setLayers(layers => layers.map(l => l.id === selectedLayerId ? { ...l, ...props } : l));
+        if (Object.prototype.hasOwnProperty.call(props, "rotation")) {
+            if (props.rotation !== undefined && props.rotation !== null) {
+                setRotationInput(String(props.rotation));
+            } else {
+                setRotationInput("");
+            }
+        }
     };
+
+    // Sync rotationInput when selected layer changes
+    useEffect(() => {
+        const layer = getLayerById(selectedLayerId);
+        if (layer) {
+            setRotationInput(
+                layer.rotation !== undefined && layer.rotation !== null
+                    ? String(layer.rotation)
+                    : "0"
+            );
+        } else {
+            setRotationInput("");
+        }
+    }, [selectedLayerId, layers]);
 
     // Draw all layers synchronously, with resize/rotate handles for selected layer
     useEffect(() => {
@@ -266,7 +290,13 @@ export default function ImageDropCanvas() {
 
     // Add rotate handle logic
     const [rotateHandleActive, setRotateHandleActive] = useState(false);
-    const [rotateStart, setRotateStart] = useState<{mouseX: number; mouseY: number; startAngle: number} | null>(null);
+    // Store initial mouse position, start angle, and initial angle from center to mouse
+    const [rotateStart, setRotateStart] = useState<{
+        mouseX: number;
+        mouseY: number;
+        startAngle: number;
+        initialAngle: number;
+    } | null>(null);
 
     // Mouse event handlers for selecting, dragging, and resizing layers
     useEffect(() => {
@@ -291,7 +321,18 @@ export default function ImageDropCanvas() {
                     const rotateHandleY = layer.y + 18;
                     if (Math.abs(mouseX - rotateHandleX) < 16 && Math.abs(mouseY - rotateHandleY) < 16) {
                         setRotateHandleActive(true);
-                        setRotateStart({ mouseX, mouseY, startAngle: layer.rotation ?? 0 });
+                        // Calculate initial angle from center to mouse
+                        const cx = layer.x + textWidth / 2;
+                        const cy = layer.y - fontSize / 2;
+                        const dx = mouseX - cx;
+                        const dy = mouseY - cy;
+                        const initialAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+                        setRotateStart({
+                            mouseX,
+                            mouseY,
+                            startAngle: layer.rotation ?? 0,
+                            initialAngle,
+                        });
                         return; // Prevent deselection
                     }
                 }
@@ -387,11 +428,14 @@ export default function ImageDropCanvas() {
                     const textWidth = ctx.measureText(layer.content).width;
                     const cx = layer.x + textWidth / 2;
                     const cy = layer.y - fontSize / 2;
-                    // Calculate angle from center to mouse
+                    // Calculate current angle from center to mouse
                     const dx = mouseX - cx;
                     const dy = mouseY - cy;
-                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
-                    return { ...layer, rotation: angle };
+                    const currentAngle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    // Calculate delta from initial angle
+                    const deltaAngle = currentAngle - rotateStart.initialAngle;
+                    // Apply rotation relative to startAngle
+                    return { ...layer, rotation: rotateStart.startAngle + deltaAngle };
                 }));
                 return;
             }
@@ -662,8 +706,35 @@ export default function ImageDropCanvas() {
                             )}
                             <div style={{ marginBottom: 8 }}>
                                 <label style={{ fontSize: 13 }}>Rotation:</label>
-                                <input type="range" min={-180} max={180} step={1} value={layer.rotation ?? 0} onChange={e => updateSelectedLayer({ rotation: Number(e.target.value) })} style={{ marginLeft: 8, width: 120 }} />
-                                <span style={{ marginLeft: 8 }}>{layer.rotation ?? 0}°</span>
+                                <input
+                                    type="number"
+                                    step={1}
+                                    value={rotationInput}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        setRotationInput(val);
+                                        // Only update layer if input is a valid number
+                                        if (/^-?\d+$/.test(val)) {
+                                            updateSelectedLayer({ rotation: Number(val) });
+                                        } else if (val === "") {
+                                            updateSelectedLayer({ rotation: undefined });
+                                        }
+                                    }}
+                                    onBlur={e => {
+                                        // On blur, if empty, set to undefined
+                                        if (e.target.value === "") {
+                                            setRotationInput("");
+                                            updateSelectedLayer({ rotation: undefined });
+                                        } else {
+                                            // Remove leading zeros
+                                            const cleaned = String(Number(e.target.value));
+                                            setRotationInput(cleaned);
+                                            updateSelectedLayer({ rotation: Number(cleaned) });
+                                        }
+                                    }}
+                                    style={{ marginLeft: 8, width: 60 }}
+                                />
+                                <span style={{ marginLeft: 8 }}>°</span>
                             </div>
                         </div>
                     );
