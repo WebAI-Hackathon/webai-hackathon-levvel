@@ -6,70 +6,118 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import React, { useRef, useState, type DragEvent } from "react";
 
 import type { Route } from "./+types/root";
 import "./app.css";
 
-export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
-  },
-];
+function ImageDropCanvas() {
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-export function Layout({ children }: { children: React.ReactNode }) {
+  const handleDrop = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = function (event) {
+        setImgSrc(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  React.useEffect(() => {
+    if (imgSrc && canvasRef.current) {
+      const img = new window.Image();
+      img.onload = () => {
+        const ctx = canvasRef.current!.getContext("2d");
+        if (ctx) {
+          ctx.clearRect(0, 0, canvasRef.current!.width, canvasRef.current!.height);
+          // Bild auf Canvas anpassen
+          const scale = Math.min(
+            canvasRef.current!.width / img.width,
+            canvasRef.current!.height / img.height
+          );
+          const x = (canvasRef.current!.width - img.width * scale) / 2;
+          const y = (canvasRef.current!.height - img.height * scale) / 2;
+          ctx.drawImage(
+            img,
+            0,
+            0,
+            img.width,
+            img.height,
+            x,
+            y,
+            img.width * scale,
+            img.height * scale
+          );
+        }
+      };
+      img.src = imgSrc;
+    }
+  }, [imgSrc]);
+
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
+    <div
+      onDrop={handleDrop}
+      onDragOver={handleDragOver}
+      style={{
+        border: "2px dashed #aaa",
+        borderRadius: 8,
+        width: 400,
+        height: 300,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        margin: "2rem auto",
+        background: "#fafafa",
+      }}
+    >
+      <canvas
+        ref={canvasRef}
+        width={380}
+        height={280}
+        style={{ background: "#fff", borderRadius: 4 }}
+      />
+      {!imgSrc && (
+        <span
+          style={{
+            position: "absolute",
+            color: "#888",
+            pointerEvents: "none",
+            textAlign: "center",
+          }}
+        >
+          Bild hierher ziehen und ablegen
+        </span>
+      )}
+    </div>
   );
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <>
+      <ImageDropCanvas />
+      <Outlet />
+      <ScrollRestoration />
+      <Scripts />
+      <Meta />
+      <Links />
+    </>
+  );
 }
 
-export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
-  let message = "Oops!";
-  let details = "An unexpected error occurred.";
-  let stack: string | undefined;
-
-  if (isRouteErrorResponse(error)) {
-    message = error.status === 404 ? "404" : "Error";
-    details =
-      error.status === 404
-        ? "The requested page could not be found."
-        : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    details = error.message;
-    stack = error.stack;
-  }
-
+export function ErrorPage({ error }: { error: Error }) {
   return (
-    <main className="pt-16 p-4 container mx-auto">
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && (
-        <pre className="w-full p-4 overflow-x-auto">
-          <code>{stack}</code>
-        </pre>
-      )}
-    </main>
+    <div>
+      <h1>Oops!</h1>
+      <p>Es gab einen Fehler: {error.message}</p>
+    </div>
   );
 }
