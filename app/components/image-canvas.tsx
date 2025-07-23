@@ -1,6 +1,6 @@
 import {type DragEvent, useEffect, useRef, useState} from "react";
 
-// Layer type definition
+// Extend Layer type for text formatting
 interface Layer {
     id: string;
     type: "image" | "text";
@@ -10,6 +10,17 @@ interface Layer {
     width?: number;
     height?: number;
     fontSize?: number;
+    // Text layer options
+    color?: string;
+    fontFamily?: string;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+    strikethrough?: boolean;
+    // Image layer options
+    opacity?: number;
+    borderColor?: string;
+    borderWidth?: number;
 }
 
 export default function ImageDropCanvas() {
@@ -93,6 +104,11 @@ export default function ImageDropCanvas() {
     // Helper: get layer by id
     const getLayerById = (id: string | null) => layers.find(l => l.id === id);
 
+    // Helper: update selected layer
+    const updateSelectedLayer = (props: Partial<Layer>) => {
+        setLayers(layers => layers.map(l => l.id === selectedLayerId ? { ...l, ...props } : l));
+    };
+
     // Draw all layers synchronously, with resize handles for selected layer
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -105,6 +121,8 @@ export default function ImageDropCanvas() {
             if (layer.type === "image") {
                 const img = imageCache[layer.content];
                 if (img) {
+                    ctx.save();
+                    ctx.globalAlpha = layer.opacity ?? 1;
                     ctx.drawImage(
                         img,
                         layer.x,
@@ -112,6 +130,12 @@ export default function ImageDropCanvas() {
                         layer.width || img.width,
                         layer.height || img.height
                     );
+                    if (layer.borderWidth && layer.borderWidth > 0) {
+                        ctx.strokeStyle = layer.borderColor || "#000";
+                        ctx.lineWidth = layer.borderWidth;
+                        ctx.strokeRect(layer.x, layer.y, layer.width || img.width, layer.height || img.height);
+                    }
+                    ctx.restore();
                     // Draw resize handles if selected
                     if (layer.id === selectedLayerId) {
                         const w = layer.width || img.width;
@@ -140,9 +164,33 @@ export default function ImageDropCanvas() {
                     }
                 }
             } else if (layer.type === "text") {
-                ctx.font = `${layer.fontSize || 24}px sans-serif`;
-                ctx.fillStyle = "#222";
+                let fontStyle = "";
+                if (layer.italic) fontStyle += "italic ";
+                if (layer.bold) fontStyle += "bold ";
+                ctx.font = `${fontStyle}${layer.fontSize || 24}px ${layer.fontFamily || "sans-serif"}`;
+                ctx.fillStyle = layer.color || "#222";
+                ctx.textBaseline = "alphabetic";
                 ctx.fillText(layer.content, layer.x, layer.y);
+                // Underline/strikethrough
+                if (layer.underline || layer.strikethrough) {
+                    const textWidth = ctx.measureText(layer.content).width;
+                    if (layer.underline) {
+                        ctx.strokeStyle = layer.color || "#222";
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(layer.x, layer.y + 2);
+                        ctx.lineTo(layer.x + textWidth, layer.y + 2);
+                        ctx.stroke();
+                    }
+                    if (layer.strikethrough) {
+                        ctx.strokeStyle = layer.color || "#222";
+                        ctx.lineWidth = 2;
+                        ctx.beginPath();
+                        ctx.moveTo(layer.x, layer.y - (layer.fontSize || 24) / 2);
+                        ctx.lineTo(layer.x + textWidth, layer.y - (layer.fontSize || 24) / 2);
+                        ctx.stroke();
+                    }
+                }
                 // Draw improved resize handle if selected
                 if (layer.id === selectedLayerId) {
                     const fontSize = layer.fontSize || 24;
@@ -480,6 +528,69 @@ export default function ImageDropCanvas() {
                         </div>
                     </div>
                 ))}
+            </div>
+            {/* Edit panel for selected layer */}
+            <div style={{
+                width: 220,
+                marginLeft: 24,
+                background: "#fff",
+                border: "1px solid #eee",
+                borderRadius: 8,
+                padding: 12,
+                boxShadow: "0 2px 8px #0001",
+                height: 340,
+                overflowY: "auto"
+            }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>Edit Layer</div>
+                {selectedLayerId ? (() => {
+                    const layer = getLayerById(selectedLayerId);
+                    if (!layer) return null;
+                    if (layer.type === "text") {
+                        return (
+                            <div>
+                                <div style={{ marginBottom: 8 }}>
+                                    <label style={{ fontSize: 13 }}>Text Color:</label>
+                                    <input type="color" value={layer.color || "#222"} onChange={e => updateSelectedLayer({ color: e.target.value })} style={{ marginLeft: 8 }} />
+                                </div>
+                                <div style={{ marginBottom: 8 }}>
+                                    <label style={{ fontSize: 13 }}>Font:</label>
+                                    <select value={layer.fontFamily || "sans-serif"} onChange={e => updateSelectedLayer({ fontFamily: e.target.value })} style={{ marginLeft: 8 }}>
+                                        <option value="sans-serif">Sans</option>
+                                        <option value="serif">Serif</option>
+                                        <option value="monospace">Mono</option>
+                                        <option value="cursive">Cursive</option>
+                                        <option value="fantasy">Fantasy</option>
+                                    </select>
+                                </div>
+                                <div style={{ marginBottom: 8 }}>
+                                    <label style={{ fontSize: 13 }}>Style:</label>
+                                    <button onClick={() => updateSelectedLayer({ bold: !layer.bold })} style={{ fontWeight: "bold", marginLeft: 8, background: layer.bold ? "#007bff" : "#eee", color: layer.bold ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>B</button>
+                                    <button onClick={() => updateSelectedLayer({ italic: !layer.italic })} style={{ fontStyle: "italic", marginLeft: 4, background: layer.italic ? "#007bff" : "#eee", color: layer.italic ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>I</button>
+                                    <button onClick={() => updateSelectedLayer({ underline: !layer.underline })} style={{ textDecoration: "underline", marginLeft: 4, background: layer.underline ? "#007bff" : "#eee", color: layer.underline ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>U</button>
+                                    <button onClick={() => updateSelectedLayer({ strikethrough: !layer.strikethrough })} style={{ textDecoration: "line-through", marginLeft: 4, background: layer.strikethrough ? "#007bff" : "#eee", color: layer.strikethrough ? "#fff" : "#222", border: "none", borderRadius: 3, padding: "2px 8px" }}>S</button>
+                                </div>
+                            </div>
+                        );
+                    } else if (layer.type === "image") {
+                        return (
+                            <div>
+                                <div style={{ marginBottom: 8 }}>
+                                    <label style={{ fontSize: 13 }}>Opacity:</label>
+                                    <input type="range" min={0.1} max={1} step={0.01} value={layer.opacity ?? 1} onChange={e => updateSelectedLayer({ opacity: Number(e.target.value) })} style={{ marginLeft: 8 }} />
+                                </div>
+                                <div style={{ marginBottom: 8 }}>
+                                    <label style={{ fontSize: 13 }}>Border Color:</label>
+                                    <input type="color" value={layer.borderColor || "#000"} onChange={e => updateSelectedLayer({ borderColor: e.target.value })} style={{ marginLeft: 8 }} />
+                                </div>
+                                <div style={{ marginBottom: 8 }}>
+                                    <label style={{ fontSize: 13 }}>Border Width:</label>
+                                    <input type="number" min={0} max={20} value={layer.borderWidth ?? 0} onChange={e => updateSelectedLayer({ borderWidth: Number(e.target.value) })} style={{ marginLeft: 8, width: 50 }} />
+                                </div>
+                            </div>
+                        );
+                    }
+                    return null;
+                })() : <div style={{ color: "#888" }}>Select a layer to edit</div>}
             </div>
         </div>
     );
