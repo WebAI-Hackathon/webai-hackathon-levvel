@@ -558,24 +558,113 @@ export default function ImageDropCanvas() {
                     const { x: localMouseX, y: localMouseY } = getLocalMouseCoords(layer);
 
                     if (layer.type === "image") {
-                        let newX = layer.x, newY = layer.y, newW = layer.width || 100, newH = layer.height || 100;
-                        if (resizeHandle.corner === "br") {
-                            newW = Math.max(10, localMouseX - layer.x);
-                            newH = Math.max(10, localMouseY - layer.y);
-                        } else if (resizeHandle.corner === "tr") {
-                            newW = Math.max(10, localMouseX - layer.x);
-                            newY = localMouseY;
-                            newH = Math.max(10, layer.y + (layer.height || 100) - localMouseY);
-                        } else if (resizeHandle.corner === "bl") {
-                            newX = localMouseX;
-                            newW = Math.max(10, layer.x + (layer.width || 100) - localMouseX);
-                            newH = Math.max(10, localMouseY - layer.y);
-                        } else if (resizeHandle.corner === "tl") {
-                            newX = localMouseX;
-                            newY = localMouseY;
-                            newW = Math.max(10, layer.x + (layer.width || 100) - localMouseX);
-                            newH = Math.max(10, layer.y + (layer.height || 100) - localMouseY);
+                        const oldW = layer.width || 100;
+                        const oldH = layer.height || 100;
+
+                        // Determine the anchor point (the corner opposite to the handle)
+                        // This point should remain stationary in world coordinates during resize.
+                        const getAnchor = () => {
+                            const cx = layer.x + oldW / 2;
+                            const cy = layer.y + oldH / 2;
+                            const angleRad = (layer.rotation ?? 0) * Math.PI / 180;
+                            const cos = Math.cos(angleRad);
+                            const sin = Math.sin(angleRad);
+
+                            let anchorXLocal = 0, anchorYLocal = 0;
+                            switch (resizeHandle.corner) {
+                                case "tl": anchorXLocal = oldW; anchorYLocal = oldH; break;
+                                case "tr": anchorXLocal = 0; anchorYLocal = oldH; break;
+                                case "bl": anchorXLocal = oldW; anchorYLocal = 0; break;
+                                case "br": anchorXLocal = 0; anchorYLocal = 0; break;
+                            }
+
+                            const anchorVecX = anchorXLocal - oldW / 2;
+                            const anchorVecY = anchorYLocal - oldH / 2;
+
+                            const rotatedAnchorVecX = anchorVecX * cos - anchorVecY * sin;
+                            const rotatedAnchorVecY = anchorVecX * sin + anchorVecY * cos;
+
+                            return {
+                                x: cx + rotatedAnchorVecX,
+                                y: cy + rotatedAnchorVecY,
+                            };
+                        };
+
+                        const anchor = getAnchor();
+
+                        // We need to find the new top-left corner (newX, newY) and dimensions (newW, newH)
+                        // such that the anchor point remains the same.
+                        const angleRad = (layer.rotation ?? 0) * Math.PI / 180;
+                        const cos = Math.cos(angleRad);
+                        const sin = Math.sin(angleRad);
+                        const invCos = Math.cos(-angleRad);
+                        const invSin = Math.sin(-angleRad);
+
+                        // Vector from anchor to current mouse position in world coordinates
+                        const mouseVecX = mouseX - anchor.x;
+                        const mouseVecY = mouseY - anchor.y;
+
+                        // Rotate this vector into the layer's local coordinate system
+                        const localMouseVecX = mouseVecX * invCos - mouseVecY * invSin;
+                        const localMouseVecY = mouseVecX * invSin + mouseVecY * invCos;
+
+                        let newW = 0, newH = 0;
+                        let localHandleX = 0, localHandleY = 0;
+
+                        switch (resizeHandle.corner) {
+                            case "tl":
+                                newW = -localMouseVecX;
+                                newH = -localMouseVecY;
+                                localHandleX = -newW;
+                                localHandleY = -newH;
+                                break;
+                            case "tr":
+                                newW = localMouseVecX;
+                                newH = -localMouseVecY;
+                                localHandleX = newW;
+                                localHandleY = -newH;
+                                break;
+                            case "bl":
+                                newW = -localMouseVecX;
+                                newH = localMouseVecY;
+                                localHandleX = -newW;
+                                localHandleY = newH;
+                                break;
+                            case "br":
+                                newW = localMouseVecX;
+                                newH = localMouseVecY;
+                                localHandleX = newW;
+                                localHandleY = newH;
+                                break;
                         }
+
+                        newW = Math.max(10, newW);
+                        newH = Math.max(10, newH);
+
+                        // The anchor in the new local coordinate system
+                        const localAnchorX = resizeHandle.corner.includes("l") ? newW : 0;
+                        const localAnchorY = resizeHandle.corner.includes("t") ? newH : 0;
+
+                        // Center of the new rectangle in local coordinates
+                        const localNewCenterX = newW / 2;
+                        const localNewCenterY = newH / 2;
+
+                        // Vector from the new center to the anchor in local coordinates
+                        const vecCenterX = localAnchorX - localNewCenterX;
+                        const vecCenterY = localAnchorY - localNewCenterY;
+
+                        // Rotate this vector to world coordinates
+                        const rotatedVecCenterX = vecCenterX * cos - vecCenterY * sin;
+                        const rotatedVecCenterY = vecCenterX * sin + vecCenterY * cos;
+
+                        // The new center in world coordinates
+                        const newCenterX = anchor.x - rotatedVecCenterX;
+                        const newCenterY = anchor.y - rotatedVecCenterY;
+
+                        // The new top-left corner (x, y)
+                        const newX = newCenterX - newW / 2;
+                        const newY = newCenterY - newH / 2;
+
                         return { ...layer, x: newX, y: newY, width: newW, height: newH };
                     } else if (layer.type === "text" && resizeHandle.corner === "right" && resizeStart) {
                         // Calculate new font size based on horizontal drag from initial mouseX
@@ -722,7 +811,7 @@ export default function ImageDropCanvas() {
             }}>
                 <div style={{ fontWeight: 600, marginBottom: 8 }}>Layers</div>
                 {layers.length === 0 && <div style={{ color: "#888" }}>No layers</div>}
-                {layers.map((layer, idx) => (
+                {layers.reverse().map((layer, idx) => (
                     <div key={layer.id} style={{
                         display: "flex",
                         alignItems: "center",
