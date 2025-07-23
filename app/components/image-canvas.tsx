@@ -346,22 +346,61 @@ export default function ImageDropCanvas() {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
-            // Check rotate handle for text FIRST
+
+            // Helper function to transform mouse coordinates for a rotated layer
+            const getLocalMouseCoords = (layer: Layer) => {
+                const angle = layer.rotation ?? 0;
+                if (angle === 0) return { x: mouseX, y: mouseY };
+
+                const angleRad = -angle * Math.PI / 180;
+                const cos = Math.cos(angleRad);
+                const sin = Math.sin(angleRad);
+
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return { x: mouseX, y: mouseY };
+
+                let cx, cy;
+                if (layer.type === "image") {
+                    const img = imageCache[layer.content];
+                    const w = layer.width || (img ? img.width : 100);
+                    const h = layer.height || (img ? img.height : 100);
+                    cx = layer.x + w / 2;
+                    cy = layer.y + h / 2;
+                } else { // text
+                    ctx.font = `${layer.fontSize || 24}px ${layer.fontFamily || "sans-serif"}`;
+                    const textWidth = ctx.measureText(layer.content).width;
+                    cx = layer.x + textWidth / 2;
+                    cy = layer.y - (layer.fontSize || 24) / 2;
+                }
+
+                const dx = mouseX - cx;
+                const dy = mouseY - cy;
+                const localX = dx * cos - dy * sin + cx;
+                const localY = dx * sin + dy * cos + cy;
+
+                return { x: localX, y: localY };
+            };
+
+            // Check handles first (rotate, then resize)
             for (let i = layers.length - 1; i >= 0; i--) {
                 const layer = layers[i];
-                if (layer.id === selectedLayerId && layer.type === "text") {
+                if (layer.id !== selectedLayerId) continue;
+
+                const { x: localMouseX, y: localMouseY } = getLocalMouseCoords(layer);
+
+                // 1. Check for rotate handle (text only for now)
+                if (layer.type === "text") {
                     const fontSize = layer.fontSize || 24;
                     const ctx = canvas.getContext("2d");
                     ctx.font = `${fontSize}px sans-serif`;
                     const textWidth = ctx.measureText(layer.content).width;
                     const rotateHandleX = layer.x + textWidth / 2;
                     const rotateHandleY = layer.y + 18;
-                    if (Math.abs(mouseX - rotateHandleX) < 16 && Math.abs(mouseY - rotateHandleY) < 16) {
+                    if (Math.abs(localMouseX - rotateHandleX) < 16 && Math.abs(localMouseY - rotateHandleY) < 16) {
                         setRotateHandleActive(true);
-                        // Calculate initial angle from center to mouse
                         const cx = layer.x + textWidth / 2;
                         const cy = layer.y - fontSize / 2;
-                        const dx = mouseX - cx;
+                        const dx = mouseX - cx; // Use original mouse coords for angle calculation
                         const dy = mouseY - cy;
                         const initialAngle = Math.atan2(dy, dx) * 180 / Math.PI;
                         setRotateStart({
@@ -370,50 +409,48 @@ export default function ImageDropCanvas() {
                             startAngle: layer.rotation ?? 0,
                             initialAngle,
                         });
-                        return; // Prevent deselection
+                        return; // Found handle, stop processing
                     }
                 }
-            }
-            // Check resize handles first
-            for (let i = layers.length - 1; i >= 0; i--) {
-                const layer = layers[i];
-                if (layer.id === selectedLayerId) {
-                    if (layer.type === "image") {
-                        const w = layer.width || 100;
-                        const h = layer.height || 100;
-                        const handles = [
-                            {corner: "tl", x: layer.x, y: layer.y},
-                            {corner: "tr", x: layer.x + w, y: layer.y},
-                            {corner: "bl", x: layer.x, y: layer.y + h},
-                            {corner: "br", x: layer.x + w, y: layer.y + h},
-                        ];
-                        for (const handle of handles) {
-                            if (Math.abs(mouseX - handle.x) < 12 && Math.abs(mouseY - handle.y) < 12) {
-                                setResizeHandle({corner: handle.corner});
-                                resizing = true;
-                                return;
-                            }
-                        }
-                    } else if (layer.type === "text") {
-                        const fontSize = layer.fontSize || 24;
-                        const ctx = canvas.getContext("2d");
-                        ctx.font = `${fontSize}px sans-serif`;
-                        const textWidth = ctx.measureText(layer.content).width;
-                        // Improved: right-middle handle for text
-                        const handleX = layer.x + textWidth + 8;
-                        const handleY = layer.y - fontSize / 2;
-                        if (Math.abs(mouseX - handleX) < 18 && Math.abs(mouseY - handleY) < 18) {
-                            setResizeHandle({corner: "right"});
-                            setResizeStart({ mouseX, fontSize });
+
+                // 2. Check for resize handles
+                if (layer.type === "image") {
+                    const w = layer.width || 100;
+                    const h = layer.height || 100;
+                    const handles = [
+                        { corner: "tl", x: layer.x, y: layer.y },
+                        { corner: "tr", x: layer.x + w, y: layer.y },
+                        { corner: "bl", x: layer.x, y: layer.y + h },
+                        { corner: "br", x: layer.x + w, y: layer.y + h },
+                    ];
+                    for (const handle of handles) {
+                        if (Math.abs(localMouseX - handle.x) < 12 && Math.abs(localMouseY - handle.y) < 12) {
+                            setResizeHandle({ corner: handle.corner });
                             resizing = true;
                             return;
                         }
                     }
+                } else if (layer.type === "text") {
+                    const fontSize = layer.fontSize || 24;
+                    const ctx = canvas.getContext("2d");
+                    ctx.font = `${fontSize}px sans-serif`;
+                    const textWidth = ctx.measureText(layer.content).width;
+                    const handleX = layer.x + textWidth + 8;
+                    const handleY = layer.y - fontSize / 2;
+                    if (Math.abs(localMouseX - handleX) < 18 && Math.abs(localMouseY - handleY) < 18) {
+                        setResizeHandle({ corner: "right" });
+                        setResizeStart({ mouseX, fontSize });
+                        resizing = true;
+                        return;
+                    }
                 }
             }
-            // If not resizing, check for layer selection/dragging
+
+            // If no handle was clicked, check for layer selection/dragging
             for (let i = layers.length - 1; i >= 0; i--) {
                 const layer = layers[i];
+                const { x: localMouseX, y: localMouseY } = getLocalMouseCoords(layer);
+
                 if (layer.type === "text") {
                     const fontSize = layer.fontSize || 24;
                     const ctx = canvas.getContext("2d");
@@ -421,10 +458,10 @@ export default function ImageDropCanvas() {
                     const textWidth = ctx.measureText(layer.content).width;
                     const textHeight = fontSize;
                     if (
-                        mouseX >= layer.x &&
-                        mouseX <= layer.x + textWidth &&
-                        mouseY >= layer.y - textHeight &&
-                        mouseY <= layer.y
+                        localMouseX >= layer.x &&
+                        localMouseX <= layer.x + textWidth &&
+                        localMouseY >= layer.y - textHeight &&
+                        localMouseY <= layer.y
                     ) {
                         setSelectedLayerId(layer.id);
                         setDraggedLayerId(layer.id);
@@ -435,10 +472,10 @@ export default function ImageDropCanvas() {
                     const width = layer.width || 100;
                     const height = layer.height || 100;
                     if (
-                        mouseX >= layer.x &&
-                        mouseX <= layer.x + width &&
-                        mouseY >= layer.y &&
-                        mouseY <= layer.y + height
+                        localMouseX >= layer.x &&
+                        localMouseX <= layer.x + width &&
+                        localMouseY >= layer.y &&
+                        localMouseY <= layer.y + height
                     ) {
                         setSelectedLayerId(layer.id);
                         setDraggedLayerId(layer.id);
@@ -447,6 +484,8 @@ export default function ImageDropCanvas() {
                     }
                 }
             }
+
+            // If nothing was clicked, deselect
             setSelectedLayerId(null);
         };
 
@@ -454,6 +493,41 @@ export default function ImageDropCanvas() {
             const rect = canvas.getBoundingClientRect();
             const mouseX = e.clientX - rect.left;
             const mouseY = e.clientY - rect.top;
+
+            // Helper function to transform mouse coordinates for a rotated layer
+            const getLocalMouseCoords = (layer: Layer) => {
+                const angle = layer.rotation ?? 0;
+                if (angle === 0) return { x: mouseX, y: mouseY };
+
+                const angleRad = -angle * Math.PI / 180;
+                const cos = Math.cos(angleRad);
+                const sin = Math.sin(angleRad);
+
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return { x: mouseX, y: mouseY };
+
+                let cx, cy;
+                if (layer.type === "image") {
+                    const img = imageCache[layer.content];
+                    const w = layer.width || (img ? img.width : 100);
+                    const h = layer.height || (img ? img.height : 100);
+                    cx = layer.x + w / 2;
+                    cy = layer.y + h / 2;
+                } else { // text
+                    ctx.font = `${layer.fontSize || 24}px ${layer.fontFamily || "sans-serif"}`;
+                    const textWidth = ctx.measureText(layer.content).width;
+                    cx = layer.x + textWidth / 2;
+                    cy = layer.y - (layer.fontSize || 24) / 2;
+                }
+
+                const dx = mouseX - cx;
+                const dy = mouseY - cy;
+                const localX = dx * cos - dy * sin + cx;
+                const localY = dx * sin + dy * cos + cy;
+
+                return { x: localX, y: localY };
+            };
+
             // Rotate logic for text
             if (rotateHandleActive && selectedLayerId && rotateStart) {
                 setLayers(layers => layers.map(layer => {
@@ -480,29 +554,32 @@ export default function ImageDropCanvas() {
             if (resizeHandle && selectedLayerId) {
                 setLayers(layers => layers.map(layer => {
                     if (layer.id !== selectedLayerId) return layer;
+
+                    const { x: localMouseX, y: localMouseY } = getLocalMouseCoords(layer);
+
                     if (layer.type === "image") {
                         let newX = layer.x, newY = layer.y, newW = layer.width || 100, newH = layer.height || 100;
                         if (resizeHandle.corner === "br") {
-                            newW = Math.max(10, mouseX - layer.x);
-                            newH = Math.max(10, mouseY - layer.y);
+                            newW = Math.max(10, localMouseX - layer.x);
+                            newH = Math.max(10, localMouseY - layer.y);
                         } else if (resizeHandle.corner === "tr") {
-                            newW = Math.max(10, mouseX - layer.x);
-                            newY = mouseY;
-                            newH = Math.max(10, layer.y + (layer.height || 100) - mouseY);
+                            newW = Math.max(10, localMouseX - layer.x);
+                            newY = localMouseY;
+                            newH = Math.max(10, layer.y + (layer.height || 100) - localMouseY);
                         } else if (resizeHandle.corner === "bl") {
-                            newX = mouseX;
-                            newW = Math.max(10, layer.x + (layer.width || 100) - mouseX);
-                            newH = Math.max(10, mouseY - layer.y);
+                            newX = localMouseX;
+                            newW = Math.max(10, layer.x + (layer.width || 100) - localMouseX);
+                            newH = Math.max(10, localMouseY - layer.y);
                         } else if (resizeHandle.corner === "tl") {
-                            newX = mouseX;
-                            newY = mouseY;
-                            newW = Math.max(10, layer.x + (layer.width || 100) - mouseX);
-                            newH = Math.max(10, layer.y + (layer.height || 100) - mouseY);
+                            newX = localMouseX;
+                            newY = localMouseY;
+                            newW = Math.max(10, layer.x + (layer.width || 100) - localMouseX);
+                            newH = Math.max(10, layer.y + (layer.height || 100) - localMouseY);
                         }
                         return { ...layer, x: newX, y: newY, width: newW, height: newH };
                     } else if (layer.type === "text" && resizeHandle.corner === "right" && resizeStart) {
                         // Calculate new font size based on horizontal drag from initial mouseX
-                        const deltaX = mouseX - resizeStart.mouseX;
+                        const deltaX = mouseX - resizeStart.mouseX; // Text resize is simpler, no need for local coords here
                         const fontSize = Math.max(8, resizeStart.fontSize + deltaX / 2);
                         return { ...layer, fontSize };
                     }
