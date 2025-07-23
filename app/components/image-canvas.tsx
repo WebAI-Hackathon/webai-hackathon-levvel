@@ -641,6 +641,22 @@ export default function ImageDropCanvas() {
                                 style={{ fontSize: 12, background: "#eee", border: "none", borderRadius: 3, cursor: idx === layers.length - 1 ? "not-allowed" : "pointer" }}
                                 title="Move down"
                             >↓</button>
+                            <button
+                                onClick={() => {
+                                    setLayers(layers => layers.filter(l => l.id !== layer.id));
+                                    if (selectedLayerId === layer.id) setSelectedLayerId(null);
+                                }}
+                                style={{
+                                    fontSize: 12,
+                                    background: "#ffdddd",
+                                    border: "none",
+                                    borderRadius: 3,
+                                    marginTop: 4,
+                                    cursor: "pointer",
+                                    color: "#a00"
+                                }}
+                                title="Delete layer"
+                            >✕</button>
                         </div>
                     </div>
                 ))}
