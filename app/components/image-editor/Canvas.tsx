@@ -1,9 +1,9 @@
-import {type DragEvent, forwardRef, useEffect} from "react";
+import {type Dispatch, type DragEvent, forwardRef, type SetStateAction, useEffect} from "react";
 import {type Layer} from "./types";
 
 interface CanvasProps {
     layers: Layer[];
-    setLayers: (layers: Layer[]) => void;
+    setLayers: Dispatch<SetStateAction<Layer[]>>;
     bgColor: string;
     selectedLayerId: string | null;
     imageCache: { [src: string]: HTMLImageElement };
@@ -71,7 +71,7 @@ export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({
             reader.onload = function (event) {
                 const imgSrc = event.target?.result as string;
                 const newLayerId = Math.random().toString(36).slice(2);
-                const newLayers = [
+                setLayers([
                     ...layers,
                     {
                         id: newLayerId,
@@ -82,14 +82,16 @@ export const Canvas = forwardRef<HTMLCanvasElement, CanvasProps>(({
                         width: 200,
                         height: 150,
                     } as Layer,
-                ];
-                setLayers(newLayers);
+                ]);
 
                 generateImageDescription(imgSrc).then((description) => {
-                    setLayers(newLayers.map(layer => layer.id === newLayerId ? {
-                        ...layer,
-                        layerDescription: description
-                    } : layer));
+                    setLayers((prevLayers: Layer[]) =>
+                        prevLayers.map(layer =>
+                            layer.id === newLayerId
+                                ? { ...layer, layerDescription: description } as Layer
+                                : layer
+                        )
+                    );
                 });
             };
             reader.readAsDataURL(file);
