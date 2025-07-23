@@ -17,6 +17,7 @@ export default function ImageDropCanvas() {
     const [textInput, setTextInput] = useState("");
     const [draggedLayerId, setDraggedLayerId] = useState<string | null>(null);
     const [dragOffset, setDragOffset] = useState<{x: number; y: number} | null>(null);
+    const [bgColor, setBgColor] = useState<string>("#fff");
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     // Cache loaded images
@@ -90,29 +91,29 @@ export default function ImageDropCanvas() {
         if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
-        // Fill white background
-        ctx.fillStyle = "#fff";
+        // Fill background with selected color
+        ctx.fillStyle = bgColor;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        // Draw image layers from cache
-        layers.filter(l => l.type === "image").forEach(layer => {
-            const img = imageCache[layer.content];
-            if (img) {
-                ctx.drawImage(
-                    img,
-                    layer.x,
-                    layer.y,
-                    layer.width || img.width,
-                    layer.height || img.height
-                );
+        // Draw all layers in order (topmost last)
+        layers.forEach(layer => {
+            if (layer.type === "image") {
+                const img = imageCache[layer.content];
+                if (img) {
+                    ctx.drawImage(
+                        img,
+                        layer.x,
+                        layer.y,
+                        layer.width || img.width,
+                        layer.height || img.height
+                    );
+                }
+            } else if (layer.type === "text") {
+                ctx.font = `${layer.fontSize || 24}px sans-serif`;
+                ctx.fillStyle = "#222";
+                ctx.fillText(layer.content, layer.x, layer.y);
             }
         });
-        // Draw text layers
-        layers.filter(l => l.type === "text").forEach(textLayer => {
-            ctx.font = `${textLayer.fontSize || 24}px sans-serif`;
-            ctx.fillStyle = "#222";
-            ctx.fillText(textLayer.content, textLayer.x, textLayer.y);
-        });
-    }, [layers, imageCache]);
+    }, [layers, imageCache, bgColor]);
 
     // Mouse event handlers for dragging any layer
     useEffect(() => {
@@ -198,66 +199,137 @@ export default function ImageDropCanvas() {
         link.click();
     };
 
+    // Move layer up/down in the stack
+    const moveLayer = (index: number, direction: "up" | "down") => {
+        setLayers(layers => {
+            const newLayers = [...layers];
+            const target = direction === "up" ? index - 1 : index + 1;
+            if (target < 0 || target >= layers.length) return layers;
+            [newLayers[index], newLayers[target]] = [newLayers[target], newLayers[index]];
+            return newLayers;
+        });
+    };
+
     return (
-        <div
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            style={{
-                border: "2px dashed #aaa",
-                borderRadius: 8,
-                width: 400,
-                height: 340,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                margin: "2rem auto",
-                background: "#fafafa",
-                position: "relative",
-            }}
-        >
-            <canvas
-                ref={canvasRef}
-                width={380}
-                height={280}
-                style={{ background: "#fff", borderRadius: 4 }}
-            />
-            <div style={{ marginTop: 12, width: "100%", textAlign: "center" }}>
-                <input
-                    type="text"
-                    value={textInput}
-                    onChange={e => setTextInput(e.target.value)}
-                    placeholder="Add text layer..."
-                    style={{ padding: 4, borderRadius: 4, border: "1px solid #ccc", width: 180 }}
+        <div style={{ display: "flex", flexDirection: "row", justifyContent: "center" }}>
+            <div
+                onDrop={handleDrop}
+                onDragOver={handleDragOver}
+                style={{
+                    border: "2px dashed #aaa",
+                    borderRadius: 8,
+                    width: 400,
+                    height: 340,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    margin: "2rem auto",
+                    background: "#fafafa",
+                    position: "relative",
+                }}
+            >
+                <canvas
+                    ref={canvasRef}
+                    width={380}
+                    height={280}
+                    style={{ background: "#fff", borderRadius: 4 }}
                 />
-                <button
-                    onClick={handleAddText}
-                    style={{ marginLeft: 8, padding: "4px 12px", borderRadius: 4, border: "none", background: "#007bff", color: "#fff" }}
-                >
-                    Add Text
-                </button>
-                <button
-                    onClick={handleDownload}
-                    style={{ marginLeft: 8, padding: "4px 12px", borderRadius: 4, border: "none", background: "#28a745", color: "#fff" }}
-                >
-                    Download Image
-                </button>
-            </div>
-            {layers.length === 0 && (
-                <span
-                    style={{
-                        position: "absolute",
-                        top: 120,
-                        left: 0,
-                        right: 0,
-                        color: "#888",
-                        pointerEvents: "none",
-                        textAlign: "center",
-                    }}
-                >
+                <div style={{ marginTop: 12, width: "100%", textAlign: "center" }}>
+                    <input
+                        type="color"
+                        value={bgColor}
+                        onChange={e => setBgColor(e.target.value)}
+                        style={{ marginRight: 8, width: 32, height: 32, verticalAlign: "middle" }}
+                        title="Select background color"
+                    />
+                    <input
+                        type="text"
+                        value={textInput}
+                        onChange={e => setTextInput(e.target.value)}
+                        placeholder="Add text layer..."
+                        style={{ padding: 4, borderRadius: 4, border: "1px solid #ccc", width: 180 }}
+                    />
+                    <button
+                        onClick={handleAddText}
+                        style={{ marginLeft: 8, padding: "4px 12px", borderRadius: 4, border: "none", background: "#007bff", color: "#fff" }}
+                    >
+                        Add Text
+                    </button>
+                    <button
+                        onClick={handleDownload}
+                        style={{ marginLeft: 8, padding: "4px 12px", borderRadius: 4, border: "none", background: "#28a745", color: "#fff" }}
+                    >
+                        Download Image
+                    </button>
+                </div>
+                {layers.length === 0 && (
+                    <span
+                        style={{
+                            position: "absolute",
+                            top: 120,
+                            left: 0,
+                            right: 0,
+                            color: "#888",
+                            pointerEvents: "none",
+                            textAlign: "center",
+                        }}
+                    >
           Drag and drop an image or add text layer
         </span>
-            )}
+                )}
+            </div>
+            {/* Layer list sidebar */}
+            <div style={{
+                width: 180,
+                marginLeft: 24,
+                background: "#fff",
+                border: "1px solid #eee",
+                borderRadius: 8,
+                padding: 12,
+                boxShadow: "0 2px 8px #0001",
+                height: 340,
+                overflowY: "auto"
+            }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>Layers</div>
+                {layers.length === 0 && <div style={{ color: "#888" }}>No layers</div>}
+                {layers.map((layer, idx) => (
+                    <div key={layer.id} style={{
+                        display: "flex",
+                        alignItems: "center",
+                        marginBottom: 10,
+                        padding: 6,
+                        borderRadius: 6,
+                        background: draggedLayerId === layer.id ? "#e6f0ff" : "#f8f8f8",
+                        border: "1px solid #eee"
+                    }}>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 13, fontWeight: 500 }}>
+                                {layer.type === "image" ? "Image" : "Text"}
+                            </div>
+                            {layer.type === "image" ? (
+                                <img src={layer.content} alt="preview" style={{ width: 32, height: 24, objectFit: "cover", borderRadius: 3, marginTop: 2 }} />
+                            ) : (
+                                <div style={{ fontSize: 13, color: "#222", marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", maxWidth: 100 }}>{layer.content}</div>
+                            )}
+                        </div>
+                        <div style={{ display: "flex", flexDirection: "column", marginLeft: 8 }}>
+                            <button
+                                onClick={() => moveLayer(idx, "up")}
+                                disabled={idx === 0}
+                                style={{ fontSize: 12, marginBottom: 2, background: "#eee", border: "none", borderRadius: 3, cursor: idx === 0 ? "not-allowed" : "pointer" }}
+                                title="Move up"
+                            >↑</button>
+                            <button
+                                onClick={() => moveLayer(idx, "down")}
+                                disabled={idx === layers.length - 1}
+                                style={{ fontSize: 12, background: "#eee", border: "none", borderRadius: 3, cursor: idx === layers.length - 1 ? "not-allowed" : "pointer" }}
+                                title="Move down"
+                            >↓</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
     );
 }
