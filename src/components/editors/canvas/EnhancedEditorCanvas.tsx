@@ -338,16 +338,16 @@ export const EnhancedEditorCanvas = ({
       filteredObjects.map((obj, index) => {
         if (obj.isType("textbox")) {
           const textObj = obj as Textbox;
-          return `Text Object id = ${index}: "${textObj.text}" at (${obj.left}, ${obj.top}) with size ${textObj.width}x${textObj.height}`;
+          return `Text Object id = ${index}: "${textObj.text}" at (X: ${obj.left}, Y: ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height})`;
         } else if (obj.isType('rect')) {
-          return `Rectangle Object id = ${index} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
+          return `Rectangle Object id = ${index} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height})`;
         } else if (obj.isType('circle')) {
-          return `Circle Object id = ${index} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
+          return `Circle Object id = ${index} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height})`;
         } else if (obj.isType("image")) {
           const imageDescription = obj?.["imageDescription"] || "No description";
-          return `Image Object id = ${index} at (${obj.left}, ${obj.top}) with size (${obj.width} x ${obj.height}) with description: "${imageDescription}"`;
+          return `Image Object id = ${index} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) with description: "${imageDescription}"`;
         } else if (obj.isType("triangle")) {
-          return `Triangle Object id = ${index} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
+          return `Triangle Object id = ${index} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height})`;
         } else if (obj.isType("line")) {
           const line = obj as Line;
           return `Line Object id = ${index} from (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2})`;
