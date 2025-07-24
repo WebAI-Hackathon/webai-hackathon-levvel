@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import {Canvas as FabricCanvas, Image as FabricImage, Circle, Rect, Textbox, FabricObject} from "fabric";
-import { ImageIcon } from "lucide-react";
+import {Canvas as FabricCanvas, Image as FabricImage, Circle, Rect, Textbox, FabricObject, Triangle, Line} from "fabric";
+import {ImageIcon} from "lucide-react";
 import { toast } from "sonner";
 import { NavigationControls } from "./NavigationControls";
 import {Tool} from "@/components/Tool.tsx";
@@ -182,7 +182,7 @@ export const EnhancedEditorCanvas = ({
     const pointer = fabricCanvas.getViewportPoint(e.e);
 
     switch (activeTool) {
-      case "rectangle":
+      case "rectangle": {
         const rect = new Rect({
           left: pointer.x - 50,
           top: pointer.y - 25,
@@ -193,13 +193,15 @@ export const EnhancedEditorCanvas = ({
           stroke: activeColor,
           rx: 5, // Rounded corners
           ry: 5,
+          centeredRotation: true,
         });
         fabricCanvas.add(rect);
         fabricCanvas.setActiveObject(rect);
         setActiveTool?.("select"); // <-- Werkzeug zurücksetzen
         break;
+      }
 
-      case "circle":
+      case "circle": {
         const circle = new Circle({
           left: pointer.x - 25,
           top: pointer.y - 25,
@@ -207,13 +209,15 @@ export const EnhancedEditorCanvas = ({
           radius: 25,
           strokeWidth: strokeWidth,
           stroke: activeColor,
+          centeredRotation: true,
         });
         fabricCanvas.add(circle);
         fabricCanvas.setActiveObject(circle);
         setActiveTool?.("select");
         break;
+      }
 
-      case "text":
+      case "text": {
         const text = new Textbox("Edit text", {
           left: pointer.x,
           top: pointer.y,
@@ -223,12 +227,42 @@ export const EnhancedEditorCanvas = ({
           width: 200,
           borderColor: activeColor,
           cornerColor: activeColor,
+          centeredRotation: true,
         });
         fabricCanvas.add(text);
         fabricCanvas.setActiveObject(text);
         text.enterEditing();
         setActiveTool?.("select");
         break;
+      }
+      case "triangle":
+        { const triangle = new Triangle({
+          left: pointer.x - 50,
+          top: pointer.y - 50,
+          fill: activeColor,
+          width: 100,
+          height: 100,
+          strokeWidth: strokeWidth,
+          stroke: activeColor,
+          centeredRotation: true,
+        });
+        fabricCanvas.add(triangle);
+        fabricCanvas.setActiveObject(triangle);
+        setActiveTool?.("select");
+        break; }
+
+        case "line":
+            { const line = new Line([pointer.x - 50, pointer.y, pointer.x + 50, pointer.y], {
+            stroke: activeColor,
+            strokeWidth: strokeWidth,
+            selectable: true,
+              centeredRotation: true,
+            });
+            fabricCanvas.add(line);
+            fabricCanvas.setActiveObject(line);
+            setActiveTool?.("select");
+
+            break; }
     }
 
     fabricCanvas.renderAll();
@@ -312,6 +346,11 @@ export const EnhancedEditorCanvas = ({
         } else if (obj.isType("image")) {
           const imageDescription = obj?.["imageDescription"] || "No description";
           return `Image Object id = ${index} at (${obj.left}, ${obj.top}) with size (${obj.width} x ${obj.height}) with description: "${imageDescription}"`;
+        } else if (obj.isType("triangle")) {
+          return `Triangle Object id = ${index} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
+        } else if (obj.isType("line")) {
+          const line = obj as Line;
+          return `Line Object id = ${index} from (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2})`;
         } else {
           console.log(obj.type);
           return `Object id = ${index} of type ${obj.type}`;

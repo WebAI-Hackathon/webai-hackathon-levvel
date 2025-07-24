@@ -16,10 +16,11 @@ import {
   Upload,
   Eraser,
   Layers,
-  Palette
+  Palette, Triangle, Slash
 } from "lucide-react";
 import { toast } from "sonner";
 import { ToolPopover } from "./ToolPopover";
+import {Line} from "react-konva";
 
 interface EnhancedToolbarProps {
   activeTool: string;
@@ -43,7 +44,9 @@ const tools = [
   { id: "text", icon: Type, label: "Text", category: "content" },
   { id: "rectangle", icon: Square, label: "Rectangle", category: "shapes" },
   { id: "circle", icon: Circle, label: "Circle", category: "shapes" },
-  { id: "crop", icon: Crop, label: "Crop", category: "advanced" },
+  { id: "triangle", icon: Triangle, label: "Triangle", category: "shapes" },
+  { id: "line", icon: Slash, label: "Line", category: "shapes" },
+  // { id: "crop", icon: Crop, label: "Crop", category: "advanced" },
 ];
 
 export const EnhancedToolbar = ({

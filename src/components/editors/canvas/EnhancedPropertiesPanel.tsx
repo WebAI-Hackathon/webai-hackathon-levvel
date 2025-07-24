@@ -34,7 +34,7 @@ import {
   Underline,
   Strikethrough,
   AlignLeft,
-  AlignCenter, AlignRight
+  AlignCenter, AlignRight, Slash, Triangle
 } from "lucide-react";
 import { toast } from "sonner";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
@@ -568,6 +568,21 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
             <span>Circle</span>
             </span>
         );
+    } else if (layer.isType("line")) {
+      return (
+        <span className="flex items-center gap-2">
+          <Slash />
+          <span>Line</span>
+        </span>
+      )
+
+    } else if (layer.isType("triangle")) {
+      return (
+        <span className="flex items-center gap-2">
+          <Triangle/>
+          <span>Triangle</span>
+        </span>
+      );
     }
     return `Layer ${index + 1}`;
   }
