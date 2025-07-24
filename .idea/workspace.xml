@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c0de44ec-ac73-485f-b264-39f48d289666" name="Changes" comment="fix: Layer editing while generating description">
+    <list default="true" id="c0de44ec-ac73-485f-b264-39f48d289666" name="Changes" comment="chore: Add files">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/editors/EnhancedCanvasEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/EnhancedCanvasEditor.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedEditorCanvas.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedEditorCanvas.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedPropertiesPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedPropertiesPanel.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +100,7 @@
       <workItem from="1753352174439" duration="1806000" />
       <workItem from="1753354562236" duration="2430000" />
       <workItem from="1753358819352" duration="398000" />
-      <workItem from="1753362212657" duration="2268000" />
+      <workItem from="1753362212657" duration="4317000" />
     </task>
     <task id="LOCAL-00001" summary="feat: Add Image canvas">
       <option name="closed" value="true" />
@@ -244,7 +246,23 @@
       <option name="project" value="LOCAL" />
       <updated>1753297247980</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="feat: Context">
+      <option name="closed" value="true" />
+      <created>1753364494596</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1753364494596</updated>
+    </task>
+    <task id="LOCAL-00020" summary="chore: Add files">
+      <option name="closed" value="true" />
+      <created>1753364794937</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1753364794937</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -268,6 +286,8 @@
     <MESSAGE value="refactor: Image canvas" />
     <MESSAGE value="feat: Image descriptions and context" />
     <MESSAGE value="fix: Layer editing while generating description" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: Layer editing while generating description" />
+    <MESSAGE value="feat: Context" />
+    <MESSAGE value="chore: Add files" />
+    <option name="LAST_COMMIT_MESSAGE" value="chore: Add files" />
   </component>
 </project>

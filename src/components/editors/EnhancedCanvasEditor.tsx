@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Canvas as FabricCanvas, Image as FabricImage, Point } from "fabric";
+import {Canvas as FabricCanvas, FabricObject, Image as FabricImage, Point} from "fabric";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ interface EnhancedCanvasEditorProps {
 
 export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: EnhancedCanvasEditorProps) {
   const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
+  const [fabricObjects, setFabricObjects] = useState<FabricObject[]>([]);
   const [activeTool, setActiveTool] = useState("select");
   const [activeColor, setActiveColor] = useState("#6366f1");
   const [brushSize, setBrushSize] = useState(5);
@@ -217,6 +218,8 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
                 width={width}
                 height={height}
                 setActiveTool={setActiveTool}
+                setFabricObjects={setFabricObjects}
+                fabricObjects={fabricObjects}
               />
             </div>
           </div>
@@ -227,6 +230,8 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
               canvas={canvas}
               activeTool={activeTool}
               selectedObject={selectedObject}
+              setSelectedObject={setSelectedObject}
+              canvasObjects={fabricObjects}
             />
           </div>
         </div>

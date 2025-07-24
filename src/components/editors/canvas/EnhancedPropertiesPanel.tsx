@@ -7,12 +7,12 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Canvas as FabricCanvas, Image as FabricImage } from "fabric";
-import { 
-  Palette, 
-  Sun, 
-  Contrast, 
-  Droplets, 
+import {Canvas as FabricCanvas, FabricObject, Image as FabricImage} from "fabric";
+import {
+  Palette,
+  Sun,
+  Contrast,
+  Droplets,
   Zap,
   RotateCw,
   FlipHorizontal,
@@ -30,8 +30,10 @@ import { toast } from "sonner";
 
 interface EnhancedPropertiesPanelProps {
   canvas?: FabricCanvas | null;
+  canvasObjects?: FabricObject[];
   activeTool: string;
   selectedObject?: any;
+  setSelectedObject?: (obj: any) => void;
 }
 
 interface FilterSettings {
@@ -53,7 +55,7 @@ const filterPresets = [
   { name: "Dramatic", filters: { brightness: -10, contrast: 40, saturation: 20, hue: 0, blur: 0, sepia: 0, grayscale: 0 } },
 ];
 
-export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: EnhancedPropertiesPanelProps) => {
+export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject, setSelectedObject }: EnhancedPropertiesPanelProps) => {
   const [filters, setFilters] = useState<FilterSettings>({
     brightness: 0,
     contrast: 0,
@@ -79,7 +81,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
           filterSettings.sepia > 0 ? `sepia(${filterSettings.sepia / 100})` : '',
           filterSettings.grayscale > 0 ? `grayscale(${filterSettings.grayscale / 100})` : ''
         ].filter(Boolean).join(' ');
-        
+
         canvasEl.style.filter = filterString;
       }
       canvas?.renderAll();
@@ -102,7 +104,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
   const applyFilterPreset = (preset: typeof filterPresets[0]) => {
     setFilters(preset.filters);
     setActivePreset(preset.name);
-    
+
     if (canvas && selectedObject && selectedObject.type === 'image') {
       applyFiltersToImage(selectedObject as FabricImage, preset.filters);
       toast.success(`Applied ${preset.name} filter`);
@@ -181,7 +183,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
               90° Right
             </Button>
           </div>
-          
+
           <div className="grid grid-cols-2 gap-2">
             <Button
               variant="outline"
@@ -213,7 +215,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                   type="number"
                   value={Math.round(selectedObject.left || 0)}
                   onChange={(e) => {
-                    selectedObject.set('left', Number(e.target.value));
+                    setSelectedObject(selectedObject.set('left', Number(e.target.value)));
                     canvas?.renderAll();
                   }}
                   className="h-8"
@@ -225,7 +227,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                   type="number"
                   value={Math.round(selectedObject.top || 0)}
                   onChange={(e) => {
-                    selectedObject.set('top', Number(e.target.value));
+                    setSelectedObject(selectedObject.set('top', Number(e.target.value)));
                     canvas?.renderAll();
                   }}
                   className="h-8"
@@ -236,9 +238,9 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
 
           {/* Opacity */}
           <div>
-            <Label>Opacity: {Math.round((selectedObject.opacity || 1) * 100)}%</Label>
+            <Label>Opacity: {Math.round((selectedObject.opacity ?? 1) * 100)}%</Label>
             <Slider
-              value={[(selectedObject.opacity || 1) * 100]}
+              value={[(selectedObject.opacity ?? 1) * 100]}
               onValueChange={([value]) => {
                 selectedObject.set('opacity', value / 100);
                 canvas?.renderAll();
@@ -331,7 +333,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                     className="mt-2"
                   />
                 </div>
-                
+
                 <div>
                   <Label>Color</Label>
                   <input
@@ -343,6 +345,26 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                     }}
                     className="w-full h-10 rounded border cursor-pointer mt-2"
                   />
+                </div>
+
+                <div>
+                  <Label>Font Alignment</Label>
+                    <div className="grid grid-cols-3 gap-2 mt-2">
+                        {['left', 'center', 'right'].map((align) => (
+                        <Button
+                            key={align}
+                            variant={selectedObject.textAlign === align ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => {
+                            selectedObject.set('textAlign', align);
+                            canvas?.renderAll();
+                            }}
+                        >
+                            {align.charAt(0).toUpperCase() + align.slice(1)}
+                        </Button>
+                        ))}
+                    </div>
+
                 </div>
 
                 <div>
@@ -400,7 +422,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                     className="w-full h-10 rounded border cursor-pointer mt-2"
                   />
                 </div>
-                
+
                 <div>
                   <Label>Stroke Color</Label>
                   <input
@@ -413,7 +435,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                     className="w-full h-10 rounded border cursor-pointer mt-2"
                   />
                 </div>
-                
+
                 <div>
                   <Label>Stroke Width: {selectedObject.strokeWidth || 0}px</Label>
                   <Slider
@@ -560,7 +582,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
             Layers
           </TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="properties" className="m-0 h-[calc(100%-60px)] overflow-y-auto p-4">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -569,17 +591,17 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                 {selectedObject ? `${selectedObject.type} selected` : 'No selection'}
               </span>
             </div>
-            
+
             <Separator />
-            
+
             {renderObjectProperties()}
           </div>
         </TabsContent>
-        
+
         <TabsContent value="filters" className="m-0 h-[calc(100%-60px)] overflow-y-auto p-4">
           {renderFilterPanel()}
         </TabsContent>
-        
+
         <TabsContent value="layers" className="m-0 h-[calc(100%-60px)] overflow-y-auto p-4">
           <Card>
             <CardHeader>

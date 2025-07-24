@@ -16,6 +16,8 @@ interface EnhancedEditorCanvasProps {
   width?: number;
   height?: number;
   setActiveTool?: (tool: string) => void;
+  fabricObjects?: FabricObject[];
+  setFabricObjects?: (objects: FabricObject[]) => void;
 }
 
 export const EnhancedEditorCanvas = ({
@@ -28,12 +30,14 @@ export const EnhancedEditorCanvas = ({
   onImageLoad,
   width = 800,
   height = 600,
-  setActiveTool // <-- hinzugefügt
+  setActiveTool,
+  fabricObjects = [],
+  setFabricObjects = () => { /* no-op */ }
 }: EnhancedEditorCanvasProps) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
-  const [fabricObjects, setFabricObjects] = useState<FabricObject[]>([]);
+
   const [isDrawing, setIsDrawing] = useState(false);
 
   const addTextBox = useCallback((text: string, left: number, top: number, width: number) => {
@@ -46,6 +50,7 @@ export const EnhancedEditorCanvas = ({
           width: width,
           borderColor: activeColor,
           cornerColor: activeColor,
+        textAlign: "center",
       });
       fabricCanvas.add(textbox);
       fabricCanvas.renderAll();
