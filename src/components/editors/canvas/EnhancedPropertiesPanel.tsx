@@ -325,8 +325,8 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
                       selectedObject.set('fontSize', value);
                       canvas?.renderAll();
                     }}
-                    min={8}
-                    max={72}
+                    min={2}
+                    max={300}
                     step={1}
                     className="mt-2"
                   />
