@@ -17,11 +17,7 @@ const App = () => (
     <TooltipProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/files" element={<FileManager />} />
-          <Route path="/editor" element={<Editor />} />
-          <Route path="/ide" element={<IDE />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="/" element={<IDE />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
