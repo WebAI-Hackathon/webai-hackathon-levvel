@@ -298,9 +298,10 @@ export const EnhancedEditorCanvas = ({
     e.preventDefault();
   }, []);
 
-  const canvasObjectsString = fabricObjects.length === 0 ?
+  const filteredObjects = fabricObjects.filter(obj => obj.visible !== false);
+  const canvasObjectsString = filteredObjects.length === 0 ?
       "No objects" :
-      fabricObjects.map((obj, index) => {
+      filteredObjects.map((obj, index) => {
         console.log(obj.type);
         if (obj.isType("textbox")) {
           const textObj = obj as Textbox;
