@@ -56,6 +56,35 @@ export const EnhancedEditorCanvas = ({
       fabricCanvas.renderAll();
   }, [activeColor, fontSize, fabricCanvas]);
 
+  const editTextBox = useCallback((index: number, newText: string) => {
+    if (fabricCanvas && fabricObjects[index] && fabricObjects[index].isType("textbox")) {
+      const textBox = fabricObjects[index] as Textbox;
+        textBox.set("text", newText);
+      fabricCanvas.renderAll();
+      toast.success("Text updated successfully!");
+    } else {
+      toast.error("Selected object is not a text box.");
+    }
+  }, [fabricCanvas, fabricObjects]);
+
+
+  const removeObjects = useCallback((ids: number[]) => {
+
+    if (fabricCanvas) {
+        // Filter out the objects to be removed
+        const objectsToRemove = ids.map(i => fabricObjects[i]).filter(obj => obj);
+        for (const obj of objectsToRemove) {
+            if (obj) {
+                fabricCanvas.remove(obj);
+            }
+        }
+      fabricCanvas.renderAll();
+      toast.success("Object removed successfully!");
+    } else {
+      toast.error("Object not found.");
+    }
+  }, [fabricCanvas, fabricObjects]);
+
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -275,16 +304,16 @@ export const EnhancedEditorCanvas = ({
         console.log(obj.type);
         if (obj.isType("textbox")) {
           const textObj = obj as Textbox;
-          return `Text ${index + 1}: "${textObj.text}" at (${obj.left}, ${obj.top})`;
+          return `Text Object id = ${index}: "${textObj.text}" at (${obj.left}, ${obj.top})`;
         } else if (obj.type === 'rect') {
-          return `Rectangle ${index + 1} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
+          return `Rectangle Object id = ${index} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
         } else if (obj.type === 'circle') {
-          return `Circle ${index + 1} at (${obj.left}, ${obj.top}) with radius ${obj.radius}`;
+          return `Circle Object id = ${index} at (${obj.left}, ${obj.top}) with radius ${obj.radius}`;
         } else if (obj.isType("image")) {
           const imageDescription = obj?.["imageDescription"] || "No description";
-          return `Image ${index + 1} at (${obj.left}, ${obj.top}) with size (${obj.width} x ${obj.height}) with description: "${imageDescription}"`;
+          return `Image Object id = ${index} at (${obj.left}, ${obj.top}) with size (${obj.width} x ${obj.height}) with description: "${imageDescription}"`;
         } else {
-          return `Object ${index + 1} of type ${obj.type}`;
+          return `Object id = ${index} of type ${obj.type}`;
         }
       }).join("\n");
 
@@ -313,6 +342,31 @@ export const EnhancedEditorCanvas = ({
                 <prop name="top" type="number" required description="Y position of the text" />
                 <prop name="width" type="number" required description="Width of the text box" />
           </Tool>
+
+            <Tool name="edit_text" description="Edit text on the canvas" onCall={(event) => {
+                const { index, newText } = event.detail;
+                if (fabricCanvas) {
+                editTextBox(index, newText);
+                }
+            }}>
+                <prop name="index" type="number" required description="Index of the text box to edit" />
+                <prop name="newText" type="string" required description="New text content" />
+            </Tool>
+
+            <Tool name="remove_objects" description="Remove objects from the canvas by giving the ids as a list" onCall={(event) => {
+                const { ids } = event.detail;
+                console.log(indeces);
+                if (fabricCanvas) {
+                  removeObjects(indeces);
+                }
+            }}>
+                <array name="users" required>
+                    <dict>
+                        <prop name="email" type="string" description="Valid email address" required></prop>
+                        <prop name="role" type="string" description="Either 'viewer', 'editor', or 'admin'"></prop>
+                    </dict>
+                </array>
+            </Tool>
         <canvas
           ref={canvasRef}
           className="max-w-full block"

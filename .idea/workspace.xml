@@ -4,11 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="c0de44ec-ac73-485f-b264-39f48d289666" name="Changes" comment="chore: Add files">
+    <list default="true" id="c0de44ec-ac73-485f-b264-39f48d289666" name="Changes" comment="fix: Layer editing while generating description">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/editors/EnhancedCanvasEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/EnhancedCanvasEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bun.lockb" beforeDir="false" afterPath="$PROJECT_DIR$/bun.lockb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedEditorCanvas.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedEditorCanvas.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedPropertiesPanel.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedPropertiesPanel.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,7 +36,7 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/WebAI-Hackathon/webai-hackathon-levvel.git&quot;,
-    &quot;accountId&quot;: &quot;4fbf5425-5d64-4f3f-9e12-c5caf0c97b4b&quot;
+    &quot;accountId&quot;: &quot;0ada67b7-d82f-4bb5-bdf2-9ba648103f34&quot;
   }
 }</component>
   <component name="ProjectColorInfo">{
@@ -47,22 +48,23 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "ide",
-    "last_opened_file_path": "/Users/lennart/Dev/Uni/sonstiges/webai-hackathon-2025",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "/Users/lennart/Dev/Uni/sonstiges/webai-hackathon-2025/node_modules/typescript/lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;ide&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/lennart/Dev/Uni/sonstiges/webai-hackathon-2025&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\presc\\Documents\\Dev\\webai-hackathon-levvel\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="ReactDesignerToolWindowState">
     <option name="myId2Visible">
       <map>
@@ -81,7 +83,7 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-WS-251.27812.2" />
+        <option value="bundled-js-predefined-d6986cc7102b-e03c56caf84a-JavaScript-WS-252.23892.218" />
       </set>
     </attachedChunks>
   </component>
@@ -100,7 +102,8 @@
       <workItem from="1753352174439" duration="1806000" />
       <workItem from="1753354562236" duration="2430000" />
       <workItem from="1753358819352" duration="398000" />
-      <workItem from="1753362212657" duration="4317000" />
+      <workItem from="1753362212657" duration="2268000" />
+      <workItem from="1753367071631" duration="5213000" />
     </task>
     <task id="LOCAL-00001" summary="feat: Add Image canvas">
       <option name="closed" value="true" />
@@ -246,27 +249,22 @@
       <option name="project" value="LOCAL" />
       <updated>1753297247980</updated>
     </task>
-    <task id="LOCAL-00019" summary="feat: Context">
-      <option name="closed" value="true" />
-      <created>1753364494596</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1753364494596</updated>
-    </task>
-    <task id="LOCAL-00020" summary="chore: Add files">
-      <option name="closed" value="true" />
-      <created>1753364794937</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1753364794937</updated>
-    </task>
-    <option name="localTasksCounter" value="21" />
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="feat: Add Image canvas" />
@@ -286,8 +284,6 @@
     <MESSAGE value="refactor: Image canvas" />
     <MESSAGE value="feat: Image descriptions and context" />
     <MESSAGE value="fix: Layer editing while generating description" />
-    <MESSAGE value="feat: Context" />
-    <MESSAGE value="chore: Add files" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: Add files" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: Layer editing while generating description" />
   </component>
 </project>
