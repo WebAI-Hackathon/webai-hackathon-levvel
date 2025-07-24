@@ -216,6 +216,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
                 onImageLoad={handleImageLoad}
                 width={width}
                 height={height}
+                setActiveTool={setActiveTool}
               />
             </div>
           </div>

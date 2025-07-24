@@ -3,6 +3,7 @@ import { Canvas as FabricCanvas, Image as FabricImage, Circle, Rect, Textbox } f
 import { ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { NavigationControls } from "./NavigationControls";
+import {Tool} from "@/components/Tool.tsx";
 
 interface EnhancedEditorCanvasProps {
   onCanvasReady?: (canvas: FabricCanvas) => void;
@@ -14,6 +15,7 @@ interface EnhancedEditorCanvasProps {
   onImageLoad?: (image: FabricImage) => void;
   width?: number;
   height?: number;
+  setActiveTool?: (tool: string) => void;
 }
 
 export const EnhancedEditorCanvas = ({
@@ -25,11 +27,29 @@ export const EnhancedEditorCanvas = ({
   strokeWidth = 2,
   onImageLoad,
   width = 800,
-  height = 600
+  height = 600,
+  setActiveTool // <-- hinzugefügt
 }: EnhancedEditorCanvasProps) => {
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
+
+  const addTextBox = useCallback((text: string, left: number, top: number, width: number) => {
+      const textbox = new Textbox(text, {
+          left: left,
+          top: top,
+          fill: activeColor,
+          fontSize: fontSize,
+          fontFamily: "Arial",
+          width: width,
+          borderColor: activeColor,
+          cornerColor: activeColor,
+      });
+      fabricCanvas.add(textbox);
+      fabricCanvas.renderAll();
+  }, [activeColor, fontSize, fabricCanvas]);
+
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -124,6 +144,7 @@ export const EnhancedEditorCanvas = ({
         });
         fabricCanvas.add(rect);
         fabricCanvas.setActiveObject(rect);
+        setActiveTool?.("select"); // <-- Werkzeug zurücksetzen
         break;
 
       case "circle":
@@ -137,6 +158,7 @@ export const EnhancedEditorCanvas = ({
         });
         fabricCanvas.add(circle);
         fabricCanvas.setActiveObject(circle);
+        setActiveTool?.("select");
         break;
 
       case "text":
@@ -153,11 +175,12 @@ export const EnhancedEditorCanvas = ({
         fabricCanvas.add(text);
         fabricCanvas.setActiveObject(text);
         text.enterEditing();
+        setActiveTool?.("select");
         break;
     }
 
     fabricCanvas.renderAll();
-  }, [fabricCanvas, activeTool, activeColor, fontSize, strokeWidth]);
+  }, [fabricCanvas, activeTool, activeColor, fontSize, strokeWidth, setActiveTool]);
 
   useEffect(() => {
     if (!fabricCanvas) return;
@@ -230,8 +253,19 @@ export const EnhancedEditorCanvas = ({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
-        <canvas
-          ref={canvasRef}
+          <Tool name="add_text" description="Add text to the canvas" onCall={(event) => {
+            const { text, left, top, width } = event.detail;
+            if (fabricCanvas) {
+              addTextBox(text, left, top, width);
+            }
+          }}>
+              <prop name="text" type="string" required description="The text to add" />
+                <prop name="left" type="number" required description="X position of the text" />
+                <prop name="top" type="number" required description="Y position of the text" />
+                <prop name="width" type="number" required description="Width of the text box" />
+          </Tool>
+        <canvas 
+          ref={canvasRef} 
           className="max-w-full block"
         />
 

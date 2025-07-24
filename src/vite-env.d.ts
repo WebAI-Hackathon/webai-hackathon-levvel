@@ -1,4 +1,5 @@
 /// <reference types="vite/client" />
+// e.g. vite-env.d.ts
 declare namespace JSX {
     interface IntrinsicElements {
         'context': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
