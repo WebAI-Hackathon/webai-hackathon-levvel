@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Canvas as FabricCanvas, Image as FabricImage, Circle, Rect, Textbox } from "fabric";
+import {Canvas as FabricCanvas, Image as FabricImage, Circle, Rect, Textbox, FabricObject} from "fabric";
 import { ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import { NavigationControls } from "./NavigationControls";
@@ -33,6 +33,7 @@ export const EnhancedEditorCanvas = ({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+  const [fabricObjects, setFabricObjects] = useState<FabricObject[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
 
   const addTextBox = useCallback((text: string, left: number, top: number, width: number) => {
@@ -80,7 +81,24 @@ export const EnhancedEditorCanvas = ({
     setFabricCanvas(canvas);
     onCanvasReady?.(canvas);
 
+    const updateObjectsState = () => {
+      if (canvas) {
+        // Use getObjects() and slice() to create a new array reference
+        // This ensures React detects the state change.
+        setFabricObjects(canvas.getObjects() as FabricObject[]);
+      }
+    };
+
+    // Listen to all events that change the canvas content
+    canvas.on("after:render", updateObjectsState);
+    canvas.on("object:added", updateObjectsState);
+    canvas.on("object:removed", updateObjectsState);
+
+
     return () => {
+      canvas.off("after:render", updateObjectsState);
+      canvas.off("object:added", updateObjectsState);
+      canvas.off("object:removed", updateObjectsState);
       canvas.dispose();
     };
   }, [onCanvasReady, width, height]);
@@ -246,6 +264,23 @@ export const EnhancedEditorCanvas = ({
     e.preventDefault();
   }, []);
 
+  const canvasObjectsString = fabricObjects.length === 0 ?
+      "No objects" :
+      fabricObjects.map((obj, index) => {
+        console.log(obj.type);
+        if (obj.isType("textbox")) {
+          const textObj = obj as Textbox;
+          console.log("Text object found:", textObj.text);
+          return `Text ${index + 1}: "${textObj.text}" at (${obj.left}, ${obj.top})`;
+        } else if (obj.type === 'rect') {
+          return `Rectangle ${index + 1} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
+        } else if (obj.type === 'circle') {
+          return `Circle ${index + 1} at (${obj.left}, ${obj.top}) with radius ${obj.radius}`;
+        } else {
+          return `Object ${index + 1} of type ${obj.type}`;
+        }
+      }).join("\n");
+
   return (
     <div className="flex flex-col">
       <div
@@ -255,6 +290,9 @@ export const EnhancedEditorCanvas = ({
       >
           <context name="Canvas Size">
               {width} x {height}
+          </context>
+          <context name="Canvas Objects">
+            {canvasObjectsString}
           </context>
           <Tool name="add_text" description="Add text to the canvas" onCall={(event) => {
             const { text, left, top, width } = event.detail;
@@ -268,8 +306,8 @@ export const EnhancedEditorCanvas = ({
                 <prop name="top" type="number" required description="Y position of the text" />
                 <prop name="width" type="number" required description="Width of the text box" />
           </Tool>
-        <canvas 
-          ref={canvasRef} 
+        <canvas
+          ref={canvasRef}
           className="max-w-full block"
         />
 

@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c0de44ec-ac73-485f-b264-39f48d289666" name="Changes" comment="fix: Layer editing while generating description">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedEditorCanvas.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedEditorCanvas.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -56,7 +57,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\presc\\Documents\\Dev\\webai-hackathon-levvel\\node_modules\\typescript\\lib",
+    "ts.external.directory.path": "/Users/lennart/Dev/Uni/sonstiges/webai-hackathon-2025/node_modules/typescript/lib",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -97,6 +98,7 @@
       <workItem from="1753352174439" duration="1806000" />
       <workItem from="1753354562236" duration="2430000" />
       <workItem from="1753358819352" duration="398000" />
+      <workItem from="1753362212657" duration="2268000" />
     </task>
     <task id="LOCAL-00001" summary="feat: Add Image canvas">
       <option name="closed" value="true" />
