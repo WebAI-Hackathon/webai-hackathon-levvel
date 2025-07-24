@@ -454,14 +454,14 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
           <span className="flex items-center gap-2">
             <Type />
             <span className="overflow-ellipsis overflow-hidden whitespace-nowrap max-w-[100px]">
-              {textbox.text.replace("\n", " ") || `Text Layer ${index + 1}`}</span>
+              {textbox.text.replace("\n", " ") || "Text Layer"}</span>
           </span>
       );
     } else if (layer.isType("image")) {
         const image = layer as FabricImage;
         return (
             <span className="flex items-center gap-2">
-                <img src={image.getSrc()} alt={`Image Layer ${index + 1}`} className="h-4 w-4 object-cover" />
+                <img src={image.getSrc()} alt="Image Layer" className="h-4 w-4 object-cover" />
                 <span>{`Image ${index + 1}`}</span>
               {image.imageDescription ? (
                   <Tooltip>
@@ -483,14 +483,14 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
         return (
             <span className="flex items-center gap-2">
             <Square />
-            <span>{`Rectangle ${index + 1}`}</span>
+            <span>Rectangle</span>
             </span>
         );
     } else if (layer.isType("circle")) {
         return (
             <span className="flex items-center gap-2">
             <Circle />
-            <span>{`Circle ${index + 1}`}</span>
+            <span>Circle</span>
             </span>
         );
     }

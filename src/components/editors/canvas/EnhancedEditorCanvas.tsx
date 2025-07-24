@@ -302,18 +302,18 @@ export const EnhancedEditorCanvas = ({
   const canvasObjectsString = filteredObjects.length === 0 ?
       "No objects" :
       filteredObjects.map((obj, index) => {
-        console.log(obj.type);
         if (obj.isType("textbox")) {
           const textObj = obj as Textbox;
           return `Text Object id = ${index}: "${textObj.text}" at (${obj.left}, ${obj.top})`;
-        } else if (obj.type === 'rect') {
+        } else if (obj.isType('rect')) {
           return `Rectangle Object id = ${index} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
-        } else if (obj.type === 'circle') {
+        } else if (obj.isType('circle')) {
           return `Circle Object id = ${index} at (${obj.left}, ${obj.top}) with radius ${obj.radius}`;
         } else if (obj.isType("image")) {
           const imageDescription = obj?.["imageDescription"] || "No description";
           return `Image Object id = ${index} at (${obj.left}, ${obj.top}) with size (${obj.width} x ${obj.height}) with description: "${imageDescription}"`;
         } else {
+          console.log(obj.type);
           return `Object id = ${index} of type ${obj.type}`;
         }
       }).join("\n");
