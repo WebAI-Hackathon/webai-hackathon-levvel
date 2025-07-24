@@ -46,7 +46,7 @@ const tools = [
   { id: "circle", icon: Circle, label: "Circle", category: "shapes" },
   { id: "triangle", icon: Triangle, label: "Triangle", category: "shapes" },
   { id: "line", icon: Slash, label: "Line", category: "shapes" },
-  // { id: "crop", icon: Crop, label: "Crop", category: "advanced" },
+  { id: "crop", icon: Crop, label: "Crop", category: "advanced" },
 ];
 
 export const EnhancedToolbar = ({
@@ -285,7 +285,7 @@ export const EnhancedToolbar = ({
         {renderToolGroup(drawingTools, "Drawing")}
         {renderToolGroup(contentTools, "Content")}
         {renderToolGroup(shapeTools, "Shapes")}
-        {renderToolGroup(advancedTools, "Advanced")}
+        {/*{renderToolGroup(advancedTools, "Advanced")}*/}
       </div>
 
       <Separator />
