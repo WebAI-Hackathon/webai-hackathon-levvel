@@ -88,7 +88,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
       }
       if (filterSettings.hue !== 0) {
         image.filters.push(new ImageFilters.HueRotation({
-          rotation: filterSettings.hue,
+          rotation: filterSettings.hue / 180 * Math.PI, // Convert degrees to radians
         }));
       }
       if (filterSettings.blur > 0) {
@@ -282,51 +282,6 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
       case 'image':
         return (
           <>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sliders className="h-5 w-5" />
-                  Image Properties
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Brightness: {filters.brightness}</Label>
-                  <Slider
-                    value={[filters.brightness]}
-                    onValueChange={([value]) => handleFilterChange('brightness', value)}
-                    min={-100}
-                    max={100}
-                    step={1}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label>Contrast: {filters.contrast}</Label>
-                  <Slider
-                    value={[filters.contrast]}
-                    onValueChange={([value]) => handleFilterChange('contrast', value)}
-                    min={-100}
-                    max={100}
-                    step={1}
-                    className="mt-2"
-                  />
-                </div>
-
-                <div>
-                  <Label>Saturation: {filters.saturation}</Label>
-                  <Slider
-                    value={[filters.saturation]}
-                    onValueChange={([value]) => handleFilterChange('saturation', value)}
-                    min={-100}
-                    max={100}
-                    step={1}
-                    className="mt-2"
-                  />
-                </div>
-              </CardContent>
-            </Card>
             {commonControls}
           </>
         );
