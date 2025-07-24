@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {Canvas as FabricCanvas, FabricObject, Image as FabricImage, filters as ImageFilters, Textbox} from "fabric";
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 
 import {
   Palette,
@@ -25,6 +26,7 @@ import {
   Layers, RotateCcw, Eye, EyeOff, Trash, LoaderCircle, Check
 } from "lucide-react";
 import { toast } from "sonner";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
 
 interface EnhancedPropertiesPanelProps {
   canvas?: FabricCanvas | null;
@@ -52,7 +54,7 @@ const filterPresets = [
   { name: "Dramatic", filters: { brightness: -10, contrast: 40, saturation: 20, hue: 0, blur: 0, sepia: 0, grayscale: 0 } },
 ];
 
-export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: EnhancedPropertiesPanelProps) => {
+export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, selectedObject }: EnhancedPropertiesPanelProps) => {
   const [filters, setFilters] = useState<FilterSettings>({
     brightness: 0,
     contrast: 0,
@@ -161,6 +163,13 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
         toast.success(`Flipped ${direction}`);
       }
     }
+  };
+
+  const reorder = (list: FabricObject[], startIndex: number, endIndex: number) => {
+    const result = Array.from(list);
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    return result;
   };
 
   const renderObjectProperties = () => {
@@ -445,7 +454,8 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
       return (
           <span className="flex items-center gap-2">
             <Type />
-            <span>{textbox.text || `Text Layer ${index + 1}`}</span>
+            <span className="overflow-ellipsis overflow-hidden whitespace-nowrap max-w-[100px]">
+              {textbox.text.replace("\n", " ") || `Text Layer ${index + 1}`}</span>
           </span>
       );
     } else if (layer.isType("image")) {
@@ -455,7 +465,16 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                 <img src={image.getSrc()} alt={`Image Layer ${index + 1}`} className="h-4 w-4 object-cover" />
                 <span>{`Image ${index + 1}`}</span>
               {image.imageDescription ? (
-                  <Check />
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Check />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        <div className="max-w-80">
+                            {image.imageDescription}
+                        </div>
+                    </TooltipContent>
+                  </Tooltip>
                   ) : (
                   <LoaderCircle className="h-4 w-4 animate-spin text-muted-foreground" />
               )}
@@ -478,6 +497,23 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
     }
     return `Layer ${index + 1}`;
   }
+
+  const onDragEnd = (result) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const reorderedLayers = reorder(
+        canvasObjects,
+        result.source.index,
+        result.destination.index
+    );
+    reorderedLayers.forEach((layer, index) => {
+      canvas.moveObjectTo(layer, index);
+    });
+    canvas.renderAll();
+    toast.success("Layer order updated");
+  };
 
   const renderLayersPanel = () => {
     if (!canvas) {
@@ -506,35 +542,52 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
           {layers.length === 0 ? (
             <p className="text-sm text-muted-foreground">No layers available.</p>
           ) : (
-            layers.map((layer, index) => (
-              <div key={index} className="flex items-center justify-between">
-                <span>{getLayerName(layer, index)}</span>
-                <div>
-                  <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        canvas.remove(layer);
-                        canvas.renderAll();
-                        toast.success(`Removed ${layer.type} layer`);
-                      }}
-                  >
-                    <Trash color="red"/>
-                  </Button>
-                  <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        layer.set('visible', !layer.visible);
-                        canvas.renderAll();
-                      }}
-                  >
-                    {layer.visible ? <Eye /> : <EyeOff />}
-                  </Button>
-                </div>
-
-              </div>
-            ))
+              <DragDropContext onDragEnd={onDragEnd}>
+                <Droppable droppableId="layers">
+                  {(provided) => (
+                      <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+                        {layers.map((layer, index) => (
+                            <Draggable key={layer.id || index} draggableId={String(layer.id || index)} index={index}>
+                              {(provided) => (
+                                  <div
+                                      ref={provided.innerRef}
+                                      {...provided.draggableProps}
+                                      {...provided.dragHandleProps}
+                                      className="flex items-center justify-between p-2 bg-secondary rounded-md"
+                                  >
+                                  <span>{getLayerName(layer, index)}</span>
+                                    <div>
+                                      <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            canvas.remove(layer);
+                                            canvas.renderAll();
+                                            toast.success(`Removed ${layer.type} layer`);
+                                          }}
+                                      >
+                                        <Trash color="red"/>
+                                      </Button>
+                                      <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            layer.set('visible', !layer.visible);
+                                            canvas.renderAll();
+                                          }}
+                                      >
+                                        {layer.visible ? <Eye /> : <EyeOff />}
+                                      </Button>
+                                    </div>
+                                  </div>
+                              )}
+                            </Draggable>
+                        ))}
+                        {provided.placeholder}
+                      </div>
+                  )}
+                </Droppable>
+              </DragDropContext>
           )}
         </CardContent>
       </Card>
