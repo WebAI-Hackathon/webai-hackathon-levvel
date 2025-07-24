@@ -253,12 +253,16 @@ export const EnhancedEditorCanvas = ({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
+          <context name="Canvas Size">
+              {width} x {height}
+          </context>
           <Tool name="add_text" description="Add text to the canvas" onCall={(event) => {
             const { text, left, top, width } = event.detail;
             if (fabricCanvas) {
               addTextBox(text, left, top, width);
             }
           }}>
+
               <prop name="text" type="string" required description="The text to add" />
                 <prop name="left" type="number" required description="X position of the text" />
                 <prop name="top" type="number" required description="Y position of the text" />
