@@ -325,51 +325,8 @@ export function EditorWorkspace({ project, selectedFile }: EditorWorkspaceProps)
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Editor toolbar */}
-      {/*<div className="h-12 border-b border-border bg-card flex items-center justify-between px-4 flex-shrink-0">*/}
-      {/*  <div className="flex items-center gap-2">*/}
-      {/*    <Button */}
-      {/*      variant="ghost" */}
-      {/*      size="sm" */}
-      {/*      onClick={handleUndo}*/}
-      {/*      disabled={!canUndo()}*/}
-      {/*      title={undoAction ? `Undo ${undoAction}` : 'Nothing to undo'}*/}
-      {/*    >*/}
-      {/*      <Undo className="h-4 w-4" />*/}
-      {/*    </Button>*/}
-      {/*    <Button */}
-      {/*      variant="ghost" */}
-      {/*      size="sm" */}
-      {/*      onClick={handleRedo}*/}
-      {/*      disabled={!canRedo()}*/}
-      {/*      title={redoAction ? `Redo ${redoAction}` : 'Nothing to redo'}*/}
-      {/*    >*/}
-      {/*      <Redo className="h-4 w-4" />*/}
-      {/*    </Button>*/}
-      {/*    <div className="w-px h-6 bg-border mx-2" />*/}
-      {/*    <Button variant="ghost" size="sm" onClick={handleSave}>*/}
-      {/*      <Save className="h-4 w-4 mr-2" />*/}
-      {/*      Save*/}
-      {/*    </Button>*/}
-      {/*  </div>*/}
-
-      {/*  <div className="flex items-center gap-2">*/}
-      {/*    <Button variant="ghost" size="sm" onClick={handleZoomOut}>*/}
-      {/*      <ZoomOut className="h-4 w-4" />*/}
-      {/*    </Button>*/}
-      {/*    <span className="text-sm font-mono min-w-12 text-center">*/}
-      {/*      {zoom}%*/}
-      {/*    </span>*/}
-      {/*    <Button variant="ghost" size="sm" onClick={handleZoomIn}>*/}
-      {/*      <ZoomIn className="h-4 w-4" />*/}
-      {/*    </Button>*/}
-      {/*  </div>*/}
-      {/*</div>*/}
-
-      {/* Editor tabs and content */}
-
+      {/* Editor tabs und Inhalt */}
       {tabs.length === 0 && renderEditor(welcomeTab)}
-
       <div className="flex-1 min-h-0">
         <Tabs value={activeTabId} onValueChange={setActiveTabId} className="h-full flex flex-col">
           <TabsList className="h-10 bg-muted rounded-none border-b border-border justify-start flex-shrink-0">
@@ -398,37 +355,20 @@ export function EditorWorkspace({ project, selectedFile }: EditorWorkspaceProps)
             ))}
             <TabsTrigger value={"new-tab"} className="group relative data-[state=active]:bg-background data-[state=active]:shadow-sm">
               <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const newTab: EditorTab = {
-                      id: `new-${Date.now()}`,
-                      title: 'New Canvas',
-                      type: 'canvas',
-                      isDirty: false,
-                    };
-                    setTabs(prev => [...prev, newTab]);
-                    setActiveTabId(newTab.id);
-                  }}
+                variant="ghost"
+                size="sm"
+                className="h-4 w-4 p-0"
+                onClick={() => setActiveTabId("new-tab")}
               >
-                <Plus className="h-3 w-3" />
+                <Plus className="h-4 w-4" />
               </Button>
             </TabsTrigger>
           </TabsList>
-
-
           {tabs.map((tab) => (
-            <TabsContent
-              key={tab.id}
-              value={tab.id}
-              className="flex-1 m-0 data-[state=inactive]:hidden overflow-auto"
-            >
+            <TabsContent key={tab.id} value={tab.id} className="flex-1 min-h-0">
               {renderEditor(tab)}
             </TabsContent>
           ))}
-
         </Tabs>
       </div>
     </div>
