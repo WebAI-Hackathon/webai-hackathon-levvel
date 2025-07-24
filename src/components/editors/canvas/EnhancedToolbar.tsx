@@ -16,12 +16,13 @@ import {
   Upload,
   Eraser,
   Layers,
-  Palette, Triangle, Slash
+  Palette, Triangle, Slash, Sparkles, LoaderCircle
 } from "lucide-react";
 import { toast } from "sonner";
 import { ToolPopover } from "./ToolPopover";
 import {Line} from "react-konva";
 import ColorPicker from "@/components/ColorPicker.tsx";
+import GenerateImageDialog from "@/components/editors/canvas/GenerateImageDialog.tsx";
 
 interface EnhancedToolbarProps {
   activeTool: string;
@@ -36,6 +37,8 @@ interface EnhancedToolbarProps {
   onStrokeWidthChange: (width: number) => void;
   canvas?: FabricCanvas | null;
   onImageUpload: (file: File) => void;
+  onGenerateImage?: (prompt: string) => void;
+  isGeneratingImage?: boolean;
 }
 
 const tools = [
@@ -62,10 +65,13 @@ export const EnhancedToolbar = ({
   strokeWidth,
   onStrokeWidthChange,
   canvas,
-  onImageUpload
+  onImageUpload,
+  onGenerateImage,
+  isGeneratingImage,
 }: EnhancedToolbarProps) => {
   const [history, setHistory] = useState<string[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [showGenerateImageDialog, setShowGenerateImageDialog] = useState(false);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -233,6 +239,18 @@ export const EnhancedToolbar = ({
         />
 
         <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowGenerateImageDialog(true)}
+            className="w-full justify-start"
+            disabled={isGeneratingImage}
+        >
+          {isGeneratingImage && <LoaderCircle className="h-4 w-4 mr-2 animate-spin" />}
+          {!isGeneratingImage && <Sparkles className="h-4 w-4 mr-2" />}
+            Generate Image
+        </Button>
+
+        <Button
           variant="outline"
           size="sm"
           onClick={handleExport}
@@ -348,6 +366,12 @@ export const EnhancedToolbar = ({
           <span className="text-xs text-muted-foreground flex-1">{activeColor}</span>
         </div>
       </div>
+      <GenerateImageDialog open={showGenerateImageDialog} onOpenChange={setShowGenerateImageDialog} onGenerate={(prompt) => {
+        // Handle image generation logic here
+        console.log("Generating image with prompt:", prompt);
+        onGenerateImage(prompt);
+        setShowGenerateImageDialog(false);
+      }} />
     </div>
   );
 };
