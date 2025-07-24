@@ -461,17 +461,20 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
 
       case 'rect':
       case 'circle':
+        case 'ellipse':
+          case 'line':
+        case 'triangle':
         return (
           <>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  {selectedObject.type === 'rect' ? <Square className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
+                  {selectedObject.type === 'rect' ? <Square className="h-5 w-5" /> : selectedObject.type === "triangle" ? <Triangle className="h-5 w-5" /> : selectedObject.type === "line" ? <Slash className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
                   Shape Properties
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div>
+                {selectedObject.type !== "line" && (<div>
                   <Label>Fill Color</Label>
                   <input
                     type="color"
@@ -482,7 +485,7 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
                     }}
                     className="w-full h-10 rounded border cursor-pointer mt-2"
                   />
-                </div>
+                </div>)}
 
                 <div>
                   <Label>Stroke Color</Label>
@@ -502,7 +505,7 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
                   <Slider
                     value={[selectedObject.strokeWidth || 0]}
                     onValueChange={([value]) => {
-                      selectedObject.set('strokeWidth', value);
+                      selectedObject.set('strokeWidth', value).setCoords();
                       canvas?.renderAll();
                     }}
                     min={0}
