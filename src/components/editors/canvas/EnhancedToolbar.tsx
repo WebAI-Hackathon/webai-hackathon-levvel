@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Canvas as FabricCanvas } from "fabric";
-import { 
-  MousePointer, 
-  Crop, 
-  Paintbrush, 
-  Type, 
-  Square, 
-  Circle, 
+import {
+  MousePointer,
+  Crop,
+  Paintbrush,
+  Type,
+  Square,
+  Circle,
   Download,
   Undo,
   Redo,
@@ -121,31 +121,30 @@ export const EnhancedToolbar = ({
         quality: 1.0,
         multiplier: 2
       });
-      
+
       const link = document.createElement('a');
       link.href = dataURL;
       link.download = 'canvas-artwork.png';
       link.click();
-      
+
       toast.success("Image exported successfully!");
     }
   };
 
-  const handleDuplicate = () => {
+  const handleDuplicate = async () => {
     if (canvas) {
       const activeObject = canvas.getActiveObject();
       if (activeObject) {
-        activeObject.clone((cloned: any) => {
-          cloned.set({
-            left: cloned.left + 10,
-            top: cloned.top + 10,
-          });
-          canvas.add(cloned);
-          canvas.setActiveObject(cloned);
-          canvas.renderAll();
-          saveCanvasState();
-          toast.success("Object duplicated");
+        const cloned = await activeObject.clone();
+        cloned.set({
+          left: activeObject.left + 10,
+          top: activeObject.top + 10,
         });
+        canvas.add(cloned);
+        canvas.setActiveObject(cloned);
+        canvas.renderAll();
+        saveCanvasState();
+        toast.success("Object duplicated");
       } else {
         toast.error("Select an object to duplicate");
       }
@@ -227,10 +226,10 @@ export const EnhancedToolbar = ({
           onChange={handleFileUpload}
           className="hidden"
         />
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleExport}
           className="w-full justify-start"
         >
@@ -245,28 +244,28 @@ export const EnhancedToolbar = ({
       <div className="px-4 space-y-2">
         <div className="text-xs text-muted-foreground font-medium">History</div>
         <div className="grid grid-cols-2 gap-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleUndo}
             disabled={historyIndex <= 0}
           >
             <Undo className="h-4 w-4" />
           </Button>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleRedo}
             disabled={historyIndex >= history.length - 1}
           >
             <Redo className="h-4 w-4" />
           </Button>
         </div>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleClear}
           className="w-full justify-start"
         >
@@ -291,19 +290,19 @@ export const EnhancedToolbar = ({
       {/* Object Operations */}
       <div className="px-4 space-y-2">
         <div className="text-xs text-muted-foreground font-medium">Objects</div>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleDuplicate}
           className="w-full justify-start"
         >
           <Layers className="h-4 w-4 mr-2" />
           Duplicate
         </Button>
-        
-        <Button 
-          variant="outline" 
-          size="sm" 
+
+        <Button
+          variant="outline"
+          size="sm"
           onClick={handleDelete}
           className="w-full justify-start"
         >
@@ -336,7 +335,7 @@ export const EnhancedToolbar = ({
             />
           ))}
         </div>
-        
+
         <div className="flex items-center gap-2">
           <input
             type="color"

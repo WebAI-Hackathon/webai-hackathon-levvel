@@ -7,13 +7,11 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {Canvas as FabricCanvas, FabricObject, Image as FabricImage, Point} from "fabric";
+import { Canvas as FabricCanvas, FabricObject, Image as FabricImage, filters as ImageFilters } from "fabric";
+
 import {
   Palette,
   Sun,
-  Contrast,
-  Droplets,
-  Zap,
   RotateCw,
   FlipHorizontal,
   FlipVertical,
@@ -69,20 +67,44 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
 
   const applyFiltersToImage = (image: FabricImage, filterSettings: FilterSettings) => {
     try {
-      const canvasEl = canvas?.getElement();
-      if (canvasEl) {
-        const filterString = [
-          `brightness(${1 + filterSettings.brightness / 100})`,
-          `contrast(${1 + filterSettings.contrast / 100})`,
-          `saturate(${1 + filterSettings.saturation / 100})`,
-          `hue-rotate(${filterSettings.hue}deg)`,
-          `blur(${filterSettings.blur / 10}px)`,
-          filterSettings.sepia > 0 ? `sepia(${filterSettings.sepia / 100})` : '',
-          filterSettings.grayscale > 0 ? `grayscale(${filterSettings.grayscale / 100})` : ''
-        ].filter(Boolean).join(' ');
+      // Clear existing filters
+      image.filters = [];
 
-        canvasEl.style.filter = filterString;
+      // Add new filters based on settings
+      if (filterSettings.brightness !== 0) {
+        image.filters.push(new ImageFilters.Brightness({
+          brightness: filterSettings.brightness / 100,
+        }));
       }
+      if (filterSettings.contrast !== 0) {
+        image.filters.push(new ImageFilters.Contrast({
+          contrast: filterSettings.contrast / 100,
+        }));
+      }
+      if (filterSettings.saturation !== 0) {
+        image.filters.push(new ImageFilters.Saturation({
+          saturation: filterSettings.saturation / 100,
+        }));
+      }
+      if (filterSettings.hue !== 0) {
+        image.filters.push(new ImageFilters.HueRotation({
+          rotation: filterSettings.hue,
+        }));
+      }
+      if (filterSettings.blur > 0) {
+        image.filters.push(new ImageFilters.Blur({
+          blur: filterSettings.blur / 100,
+        }));
+      }
+      if (filterSettings.sepia > 0) {
+        image.filters.push(new ImageFilters.Sepia());
+      }
+      if (filterSettings.grayscale > 0) {
+        image.filters.push(new ImageFilters.Grayscale());
+      }
+
+      // Apply the filters and re-render the canvas
+      image.applyFilters();
       canvas?.renderAll();
     } catch (error) {
       console.error('Error applying filters:', error);
@@ -118,6 +140,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
       if (activeObject) {
         const currentAngle = activeObject.angle || 0;
         activeObject.rotate(currentAngle + degrees);
+        activeObject.setCoords();
         canvas.renderAll();
         toast.success(`Rotated ${degrees}°`);
       }
@@ -133,6 +156,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
         } else {
           activeObject.set('flipY', !activeObject.flipY);
         }
+        activeObject.setCoords();
         canvas.renderAll();
         toast.success(`Flipped ${direction}`);
       }
