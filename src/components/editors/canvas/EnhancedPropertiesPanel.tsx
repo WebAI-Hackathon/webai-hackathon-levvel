@@ -22,7 +22,7 @@ import {
   Circle,
   Settings,
   Filter,
-  Layers
+  Layers, RotateCcw
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -487,6 +487,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
             <CardTitle className="flex items-center gap-2">
               <Sun className="h-5 w-5" />
               Manual Adjustments
+              <RotateCcw onClick={() => applyFilterPreset(filterPresets[0])} />
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -533,6 +534,18 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
                 onValueChange={([value]) => handleFilterChange('hue', value)}
                 min={-180}
                 max={180}
+                step={1}
+                className="mt-2"
+              />
+            </div>
+
+            <div>
+              <Label>Blur: {filters.blur}</Label>
+              <Slider
+                value={[filters.blur]}
+                onValueChange={([value]) => handleFilterChange('blur', value)}
+                min={0}
+                max={100}
                 step={1}
                 className="mt-2"
               />
