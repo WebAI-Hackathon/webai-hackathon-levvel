@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {Canvas as FabricCanvas, FabricObject, Image as FabricImage, filters as ImageFilters, Textbox} from "fabric";
@@ -731,14 +730,14 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
 
         <TabsContent value="properties" className="m-0 h-[calc(100%-60px)] overflow-y-auto p-4">
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary">{activeTool}</Badge>
-              <span className="text-sm text-muted-foreground">
-                {selectedObject ? `${selectedObject.type} selected` : 'No selection'}
-              </span>
-            </div>
+            {/*<div className="flex items-center gap-2">*/}
+            {/*  <Badge variant="secondary">{activeTool}</Badge>*/}
+            {/*  <span className="text-sm text-muted-foreground">*/}
+            {/*    {selectedObject ? `${selectedObject.type} selected` : 'No selection'}*/}
+            {/*  </span>*/}
+            {/*</div>*/}
 
-            <Separator />
+            {/*<Separator />*/}
 
             {renderObjectProperties()}
           </div>

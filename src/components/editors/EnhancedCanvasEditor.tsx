@@ -214,8 +214,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
         {/* Canvas Content */}
         <div className="flex-1 flex">
           <div className="flex-1 p-6 flex items-center justify-center bg-gradient-to-br from-background to-muted/20">
-            <div className="w-full max-w-4xl">
-              <EnhancedEditorCanvas
+            <EnhancedEditorCanvas
                 onCanvasReady={handleCanvasReady}
                 activeTool={activeTool}
                 activeColor={activeColor}
@@ -228,8 +227,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
                 setActiveTool={setActiveTool}
                 setFabricObjects={setFabricObjects}
                 fabricObjects={fabricObjects}
-              />
-            </div>
+            />
           </div>
 
           {/* Right Properties Panel */}
@@ -243,22 +241,22 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
           </div>
         </div>
 
-        {/* Status Bar */}
-        <div className="border-t border-border bg-card/50 backdrop-blur-sm px-6 py-2">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <span>Tool: <strong className="text-foreground">{activeTool}</strong></span>
-              {selectedObject && (
-                <span>Selected: <strong className="text-foreground">{selectedObject.type}</strong></span>
-              )}
-            </div>
+        {/*/!* Status Bar *!/*/}
+        {/*<div className="border-t border-border bg-card/50 backdrop-blur-sm px-6 py-2">*/}
+        {/*  <div className="flex items-center justify-between text-sm text-muted-foreground">*/}
+        {/*    <div className="flex items-center gap-4">*/}
+        {/*      <span>Tool: <strong className="text-foreground">{activeTool}</strong></span>*/}
+        {/*      {selectedObject && (*/}
+        {/*        <span>Selected: <strong className="text-foreground">{selectedObject.type}</strong></span>*/}
+        {/*      )}*/}
+        {/*    </div>*/}
 
-            <div className="flex items-center gap-4">
-              <span>Canvas: {width}×{height}</span>
-              <span className="text-primary">Ready</span>
-            </div>
-          </div>
-        </div>
+        {/*    <div className="flex items-center gap-4">*/}
+        {/*      <span>Canvas: {width}×{height}</span>*/}
+        {/*      <span className="text-primary">Ready</span>*/}
+        {/*    </div>*/}
+        {/*  </div>*/}
+        {/*</div>*/}
       </div>
     </div>
   );

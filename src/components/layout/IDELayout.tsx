@@ -48,7 +48,7 @@ export function IDELayout({ project }: IDELayoutProps) {
   // Find parent folder name for dialog
   const findFolderName = (folderId: string | null): string | undefined => {
     if (!folderId) return undefined;
-    
+
     const findInFiles = (files: ProjectFile[]): string | undefined => {
       for (const file of files) {
         if (file.id === folderId && file.type === 'folder') {
@@ -61,7 +61,7 @@ export function IDELayout({ project }: IDELayoutProps) {
       }
       return undefined;
     };
-    
+
     return findInFiles(project.files);
   };
 
@@ -69,24 +69,24 @@ export function IDELayout({ project }: IDELayoutProps) {
     <div className="h-[calc(100vh-4rem)] bg-background">
       <ResizablePanelGroup direction="horizontal" className="h-full">
         {/* Left Panel - Project Explorer */}
-        <ResizablePanel
-          defaultSize={25}
-          minSize={20}
-          maxSize={40}
-          collapsible
-          collapsedSize={5}
-          onCollapse={() => setLeftPanelCollapsed(true)}
-          onExpand={() => setLeftPanelCollapsed(false)}
-        >
-          <ProjectExplorer
-            files={project.files}
-            selectedFileId={selectedFile?.id}
-            onFileSelect={handleFileSelect}
-            onFileCreate={handleFileCreate}
-            onFileMove={handleFileMove}
-            isCollapsed={leftPanelCollapsed}
-          />
-        </ResizablePanel>
+        {/*<ResizablePanel*/}
+        {/*  defaultSize={25}*/}
+        {/*  minSize={20}*/}
+        {/*  maxSize={40}*/}
+        {/*  collapsible*/}
+        {/*  collapsedSize={5}*/}
+        {/*  onCollapse={() => setLeftPanelCollapsed(true)}*/}
+        {/*  onExpand={() => setLeftPanelCollapsed(false)}*/}
+        {/*>*/}
+        {/*  <ProjectExplorer*/}
+        {/*    files={project.files}*/}
+        {/*    selectedFileId={selectedFile?.id}*/}
+        {/*    onFileSelect={handleFileSelect}*/}
+        {/*    onFileCreate={handleFileCreate}*/}
+        {/*    onFileMove={handleFileMove}*/}
+        {/*    isCollapsed={leftPanelCollapsed}*/}
+        {/*  />*/}
+        {/*</ResizablePanel>*/}
 
         <ResizableHandle withHandle />
 
@@ -110,7 +110,7 @@ export function IDELayout({ project }: IDELayoutProps) {
           </>
         )}
       </ResizablePanelGroup>
-      
+
       <CreateFileDialog
         open={createFileDialogOpen}
         onOpenChange={setCreateFileDialogOpen}
