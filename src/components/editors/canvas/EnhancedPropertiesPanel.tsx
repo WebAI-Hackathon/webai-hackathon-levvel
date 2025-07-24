@@ -553,30 +553,41 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
                                       {...provided.draggableProps}
                                       {...provided.dragHandleProps}
                                       className="flex items-center justify-between p-2 bg-secondary rounded-md"
+                                      onClick={() => {
+                                        canvas.setActiveObject(layer);
+                                        canvas.renderAll();
+                                      }}
                                   >
                                   <span>{getLayerName(layer, index)}</span>
                                     <div>
                                       <Button
                                           variant="ghost"
                                           size="sm"
-                                          onClick={() => {
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (canvas.getActiveObject() === layer) {
+                                              canvas.discardActiveObject();
+                                            }
                                             canvas.remove(layer);
                                             canvas.renderAll();
-                                            toast.success(`Removed ${layer.type} layer`);
                                           }}
                                       >
                                         <Trash color="red"/>
                                       </Button>
-                                      <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => {
-                                            layer.set('visible', !layer.visible);
-                                            canvas.renderAll();
-                                          }}
-                                      >
-                                        {layer.visible ? <Eye /> : <EyeOff />}
-                                      </Button>
+                                     <Button
+                                         variant="ghost"
+                                         size="sm"
+                                         onClick={(e) => {
+                                           e.stopPropagation();
+                                           layer.set('visible', !layer.visible);
+                                           if (canvas.getActiveObject() === layer) {
+                                             canvas.discardActiveObject();
+                                           }
+                                           canvas.renderAll();
+                                         }}
+                                     >
+                                       {layer.visible ? <Eye /> : <EyeOff />}
+                                     </Button>
                                     </div>
                                   </div>
                               )}
