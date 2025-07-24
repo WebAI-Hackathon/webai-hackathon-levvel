@@ -10,12 +10,15 @@ export async function generateImageDescription(image: string): Promise<string> {
             messages: [
                 {
                     role: 'system',
-                    content: 'You are a helpful assistant that describes images.'
+                    content: `
+Please describe the following image in detail. Include objects, colors, actions, and any other relevant details.
+If the image is a recognizable meme, please mention the meme format.
+Describe where there's space to add text or other elements in the image.    
+If there are any text elements in the image, please include them in your description.`,
                 },
                 {
                     role: 'user',
                     content: [
-                        {type: "text", text: "whats in this image?"},
                         {
                             "type": "image_url",
                             "image_url": {

@@ -280,6 +280,9 @@ export const EnhancedEditorCanvas = ({
           return `Rectangle ${index + 1} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
         } else if (obj.type === 'circle') {
           return `Circle ${index + 1} at (${obj.left}, ${obj.top}) with radius ${obj.radius}`;
+        } else if (obj.isType("image")) {
+          const imageDescription = obj?.["imageDescription"] || "No description";
+          return `Image ${index + 1} at (${obj.left}, ${obj.top}) with size (${obj.width} x ${obj.height}) with description: "${imageDescription}"`;
         } else {
           return `Object ${index + 1} of type ${obj.type}`;
         }

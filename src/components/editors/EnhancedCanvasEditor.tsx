@@ -60,7 +60,8 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
     const reader = new FileReader();
     reader.onload = async (e) => {
       const imgElement = new Image();
-      imgElement.onload = () => {
+      const imgSrc = e.target?.result as string;
+      imgElement.onload = async () => {
         const fabricImg = new FabricImage(imgElement, {
           left: 0,
           top: 0,
@@ -85,11 +86,20 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
         canvas.add(fabricImg);
         canvas.setActiveObject(fabricImg);
         canvas.renderAll();
+
+        generateImageDescription(imgElement.src).then(description => {
+            fabricImg.set({
+                imageDescription: description,
+            });
+            canvas.renderAll();
+        })
+
         setHasImage(true);
         toast.success("Image loaded successfully!");
-      };
-      imgElement.src = e.target?.result as string;
 
+
+      };
+      imgElement.src = imgSrc;
       await generateImageDescription(imgElement.src);
     };
     reader.readAsDataURL(file);
