@@ -8,13 +8,14 @@ import { useToolManager } from '@/managers/ToolManager';
 import { useSelectionManager } from '@/managers/SelectionManager';
 import { Bold, Italic, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 export function TextToolWindow() {
   const { toolProperties, updateToolProperties } = useToolManager();
   const { selectedObjects } = useSelectionManager();
 
   const fontFamilies = [
-    'Arial', 'Helvetica', 'Times New Roman', 'Georgia', 
+    'Arial', 'Helvetica', 'Times New Roman', 'Georgia',
     'Verdana', 'Comic Sans MS', 'Impact', 'Trebuchet MS'
   ];
 
@@ -36,7 +37,7 @@ export function TextToolWindow() {
       {/* Font Settings */}
       <div className="space-y-3">
         <Label className="text-sm font-medium">Font</Label>
-        
+
         <div className="space-y-3">
           <div>
             <Label className="text-xs text-muted-foreground">Family</Label>
@@ -80,8 +81,8 @@ export function TextToolWindow() {
           <Button
             variant={toolProperties.fontWeight === 'bold' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => updateToolProperties({ 
-              fontWeight: toolProperties.fontWeight === 'bold' ? 'normal' : 'bold' 
+            onClick={() => updateToolProperties({
+              fontWeight: toolProperties.fontWeight === 'bold' ? 'normal' : 'bold'
             })}
             className="h-8 w-8 p-0"
           >
@@ -90,8 +91,8 @@ export function TextToolWindow() {
           <Button
             variant={toolProperties.fontStyle === 'italic' ? 'default' : 'outline'}
             size="sm"
-            onClick={() => updateToolProperties({ 
-              fontStyle: toolProperties.fontStyle === 'italic' ? 'normal' : 'italic' 
+            onClick={() => updateToolProperties({
+              fontStyle: toolProperties.fontStyle === 'italic' ? 'normal' : 'italic'
             })}
             className="h-8 w-8 p-0"
           >
@@ -124,12 +125,9 @@ export function TextToolWindow() {
       {/* Text Color */}
       <div className="space-y-2">
         <Label className="text-sm font-medium">Color</Label>
-        <Input
-          type="color"
-          value={toolProperties.fillColor || '#000000'}
-          onChange={(e) => updateToolProperties({ fillColor: e.target.value })}
-          className="w-full h-8"
-        />
+          <ColorPicker activeColor={toolProperties.fillColor || '#000000'} onColorChange={color => {
+            updateToolProperties({ fillColor: color });
+          }} />
       </div>
 
       {/* Opacity */}

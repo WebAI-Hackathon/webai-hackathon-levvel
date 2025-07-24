@@ -6,6 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import {Type, Paintbrush, Square, Circle, Slash, Triangle} from "lucide-react";
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 interface ToolPopoverProps {
   tool: string;
@@ -86,19 +87,7 @@ export const ToolPopover = ({
           <div>
             <Label className="text-sm">Color</Label>
             <div className="flex items-center gap-2 mt-1">
-              <input
-                type="color"
-                value={activeColor}
-                onChange={(e) => onColorChange(e.target.value)}
-                className="w-8 h-8 rounded border cursor-pointer"
-              />
-              <Input
-                type="text"
-                value={activeColor}
-                onChange={(e) => onColorChange(e.target.value)}
-                className="flex-1 text-xs"
-                placeholder="#000000"
-              />
+              <ColorPicker activeColor={activeColor} onColorChange={onColorChange} />
             </div>
           </div>
 
@@ -135,12 +124,7 @@ export const ToolPopover = ({
               <div>
                 <Label className="text-sm">Fill Color</Label>
                 <div className="flex items-center gap-2 mt-1">
-                  <input
-                    type="color"
-                    value={activeColor}
-                    onChange={(e) => onColorChange(e.target.value)}
-                    className="w-8 h-8 rounded border cursor-pointer"
-                  />
+                  <ColorPicker activeColor={activeColor} onColorChange={onColorChange} />
                   <span className="text-xs text-muted-foreground">Fill</span>
                 </div>
               </div>

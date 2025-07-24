@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import {Canvas as FabricCanvas, FabricObject, Image as FabricImage, Point} from "fabric";
+import {useState, useCallback, useEffect} from "react";
+import {Canvas as FabricCanvas, FabricObject, Image as FabricImage, PencilBrush, Point} from "fabric";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,16 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
   const [selectedObject, setSelectedObject] = useState<any>(null);
   const [hasImage, setHasImage] = useState(false);
   const [zoom, setZoom] = useState(100);
+
+  useEffect(() => {
+    if (!canvas) return;
+    canvas.isDrawingMode = activeTool === "draw";
+    if (activeTool === "draw") {
+      canvas.freeDrawingBrush = new PencilBrush(canvas);
+      canvas.freeDrawingBrush.color = activeColor;
+      canvas.freeDrawingBrush.width = brushSize;
+    }
+  }, [activeColor, activeTool, brushSize, canvas]);
 
   const handleCanvasReady = useCallback((fabricCanvas: FabricCanvas) => {
     setCanvas(fabricCanvas);

@@ -4,6 +4,7 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { useToolManager } from '@/managers/ToolManager';
 import { useSelectionManager } from '@/managers/SelectionManager';
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 export function ShapeToolWindow() {
   const { toolProperties, updateToolProperties } = useToolManager();
@@ -20,12 +21,9 @@ export function ShapeToolWindow() {
       <div className="space-y-3">
         <Label className="text-sm font-medium">Fill Color</Label>
         <div className="space-y-2">
-          <Input
-            type="color"
-            value={toolProperties.fillColor || '#3b82f6'}
-            onChange={(e) => updateToolProperties({ fillColor: e.target.value })}
-            className="w-full h-8"
-          />
+          <ColorPicker activeColor={toolProperties.fillColor || '#3b82f6'} onColorChange={color => {
+            updateToolProperties({ fillColor: color });
+          }}/>
           <div className="grid grid-cols-4 gap-2">
             {colorPresets.map((color) => (
               <Button
@@ -46,12 +44,9 @@ export function ShapeToolWindow() {
         <div className="space-y-3">
           <div>
             <Label className="text-xs text-muted-foreground">Color</Label>
-            <Input
-              type="color"
-              value={toolProperties.strokeColor || '#1e40af'}
-              onChange={(e) => updateToolProperties({ strokeColor: e.target.value })}
-              className="w-full h-8 mt-1"
-            />
+            <ColorPicker activeColor={toolProperties.strokeColor || '#1e40af'} onColorChange={color => {
+                updateToolProperties({ strokeColor: color });
+            }}/>
           </div>
           <div>
             <Label className="text-xs text-muted-foreground">

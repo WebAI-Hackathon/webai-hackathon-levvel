@@ -14,6 +14,7 @@ import {
   Trash2,
   Plus,
 } from "lucide-react";
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 interface MemeEditorProps {
   imageFile?: File;
@@ -73,18 +74,18 @@ export function MemeEditor({ imageFile, onCanvasReady }: MemeEditorProps) {
       if (e.target?.result) {
         try {
           const imgElement = await FabricImage.fromURL(e.target.result as string);
-          
+
           const scaleX = fabricCanvas.width! / imgElement.width!;
           const scaleY = fabricCanvas.height! / imgElement.height!;
           const scale = Math.min(scaleX, scaleY);
-          
+
           imgElement.scale(scale);
           imgElement.set({
             left: (fabricCanvas.width! - imgElement.width! * scale) / 2,
             top: (fabricCanvas.height! - imgElement.height! * scale) / 2,
             selectable: false,
           });
-          
+
           fabricCanvas.add(imgElement);
           fabricCanvas.renderAll();
         } catch (error) {
@@ -109,7 +110,7 @@ export function MemeEditor({ imageFile, onCanvasReady }: MemeEditorProps) {
       backgroundColor: 'rgba(255, 255, 255, 0.8)',
       padding: 10,
     });
-    
+
     fabricCanvas.add(text);
     fabricCanvas.setActiveObject(text);
     fabricCanvas.renderAll();
@@ -140,7 +141,7 @@ export function MemeEditor({ imageFile, onCanvasReady }: MemeEditorProps) {
       textAlign: 'center',
       width: 180,
     });
-    
+
     fabricCanvas.add(bubble);
     fabricCanvas.add(text);
     fabricCanvas.setActiveObject(text);
@@ -156,7 +157,7 @@ export function MemeEditor({ imageFile, onCanvasReady }: MemeEditorProps) {
       fontFamily: fontFamily,
       fill: textColor,
     });
-    
+
     fabricCanvas?.renderAll();
   }, [selectedText, textContent, fontSize, fontFamily, textColor, fabricCanvas]);
 
@@ -169,7 +170,7 @@ export function MemeEditor({ imageFile, onCanvasReady }: MemeEditorProps) {
   }, [fabricCanvas]);
 
   const fonts = [
-    "Arial", "Helvetica", "Times New Roman", "Courier New", 
+    "Arial", "Helvetica", "Times New Roman", "Courier New",
     "Verdana", "Comic Sans MS", "Impact", "Georgia"
   ];
 
@@ -250,15 +251,10 @@ export function MemeEditor({ imageFile, onCanvasReady }: MemeEditorProps) {
 
               <div>
                 <label className="text-sm text-muted-foreground">Color:</label>
-                <input
-                  type="color"
-                  value={textColor}
-                  onChange={(e) => {
-                    setTextColor(e.target.value);
+                <ColorPicker activeColor={textColor} onColorChange={color => {
+                    setTextColor(color);
                     updateSelectedText();
-                  }}
-                  className="w-full h-10 rounded border border-border mt-1"
-                />
+                }} />
               </div>
 
               <Button onClick={deleteSelected} variant="destructive" className="w-full">

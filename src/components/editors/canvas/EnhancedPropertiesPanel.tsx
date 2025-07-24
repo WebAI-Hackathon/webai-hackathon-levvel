@@ -34,10 +34,11 @@ import {
   Underline,
   Strikethrough,
   AlignLeft,
-  AlignCenter, AlignRight, Slash, Triangle
+  AlignCenter, AlignRight, Slash, Triangle, Waypoints, PenTool, FileQuestion
 } from "lucide-react";
 import { toast } from "sonner";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 interface EnhancedPropertiesPanelProps {
   canvas?: FabricCanvas | null;
@@ -334,15 +335,10 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
 
                 <div>
                   <Label>Color</Label>
-                  <input
-                    type="color"
-                    value={selectedObject.fill || '#000000'}
-                    onChange={(e) => {
-                      selectedObject.set('fill', e.target.value);
-                      canvas?.renderAll();
-                    }}
-                    className="w-full h-10 rounded border cursor-pointer mt-2"
-                  />
+                  <ColorPicker activeColor={selectedObject.fill ?? "#000000"} onColorChange={color => {
+                    selectedObject.set('fill', color);
+                    canvas?.renderAll();
+                  }}/>
                 </div>
 
                 <div>
@@ -441,15 +437,10 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
                       Width:  {selectedObject.strokeWidth || 0}px
                     </p>
 
-                    <input
-                      type="color"
-                      value={selectedObject.stroke || '#ffffff'}
-                      onChange={(e) => {
-                        selectedObject.set('stroke', e.target.value);
+                    <ColorPicker activeColor={selectedObject.stroke ?? "#ffffff"} onColorChange={color => {
+                        selectedObject.set('stroke', color);
                         canvas?.renderAll();
-                      }}
-                      className="w-full h-10 rounded border cursor-pointer mt-3"
-                    />
+                    }} />
 
                   </div>
                 </div>
@@ -464,40 +455,31 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
         case 'ellipse':
           case 'line':
         case 'triangle':
+          case "path":
         return (
           <>
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  {selectedObject.type === 'rect' ? <Square className="h-5 w-5" /> : selectedObject.type === "triangle" ? <Triangle className="h-5 w-5" /> : selectedObject.type === "line" ? <Slash className="h-5 w-5" /> : <Circle className="h-5 w-5" />}
+                  {selectedObject.type === 'rect' ? <Square className="h-5 w-5" /> : selectedObject.type === "triangle" ? <Triangle className="h-5 w-5" /> : selectedObject.type === "line" ? <Slash className="h-5 w-5" /> :selectedObject.type === "path" ? <PenTool className="h-5 w-5"/> : <Circle className="h-5 w-5" />}
                   Shape Properties
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {selectedObject.type !== "line" && (<div>
                   <Label>Fill Color</Label>
-                  <input
-                    type="color"
-                    value={selectedObject.fill || '#000000'}
-                    onChange={(e) => {
-                      selectedObject.set('fill', e.target.value);
-                      canvas?.renderAll();
-                    }}
-                    className="w-full h-10 rounded border cursor-pointer mt-2"
-                  />
+                  <ColorPicker activeColor={selectedObject.fill || '#000000'} onColorChange={(color) => {
+                    selectedObject.set('fill', color);
+                    canvas?.renderAll();
+                  }} />
                 </div>)}
 
                 <div>
                   <Label>Stroke Color</Label>
-                  <input
-                    type="color"
-                    value={selectedObject.stroke || '#000000'}
-                    onChange={(e) => {
-                      selectedObject.set('stroke', e.target.value);
-                      canvas?.renderAll();
-                    }}
-                    className="w-full h-10 rounded border cursor-pointer mt-2"
-                  />
+                  <ColorPicker activeColor={selectedObject.stroke ?? "#000000"} onColorChange={(color) => {
+                    selectedObject.set('stroke', color);
+                    canvas?.renderAll();
+                  }} />
                 </div>
 
                 <div>
@@ -581,13 +563,25 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
 
     } else if (layer.isType("triangle")) {
       return (
-        <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2">
           <Triangle/>
           <span>Triangle</span>
         </span>
       );
+    } else if (layer.isType("path")) {
+        return (
+            <span className="flex items-center gap-2">
+              <PenTool />
+              <span>Drawing</span>
+            </span>
+        );
     }
-    return `Layer ${index + 1}`;
+    return (
+        <span className="flex items-center gap-2">
+            <FileQuestion />
+            <span>{layer.type}</span>
+        </span>
+    )
   }
 
   const onDragEnd = (result) => {

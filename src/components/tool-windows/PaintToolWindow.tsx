@@ -4,6 +4,7 @@ import { Slider } from '@/components/ui/slider';
 import { Button } from '@/components/ui/button';
 import { useToolManager } from '@/managers/ToolManager';
 import { Paintbrush, Eraser } from 'lucide-react';
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 export function PaintToolWindow() {
   const { toolProperties, updateToolProperties, activeTool, setActiveTool } = useToolManager();
@@ -61,7 +62,7 @@ export function PaintToolWindow() {
           min={1}
           step={1}
         />
-        
+
         {/* Brush size presets */}
         <div className="grid grid-cols-5 gap-1">
           {brushPresets.map((preset) => (
@@ -82,13 +83,10 @@ export function PaintToolWindow() {
       {activeTool === 'brush' && (
         <div className="space-y-3">
           <Label className="text-sm font-medium">Brush Color</Label>
-          <Input
-            type="color"
-            value={toolProperties.brushColor || '#000000'}
-            onChange={(e) => updateToolProperties({ brushColor: e.target.value })}
-            className="w-full h-8"
-          />
-          
+            <ColorPicker activeColor={toolProperties.brushColor ?? "#000000"} onColorChange={color => {
+            updateToolProperties({ brushColor: color });
+            }} />
+
           {/* Color presets */}
           <div className="grid grid-cols-4 gap-2">
             {colorPresets.map((color) => (
@@ -96,7 +94,7 @@ export function PaintToolWindow() {
                 key={color}
                 variant="outline"
                 className="h-8 w-full p-0 border-2"
-                style={{ 
+                style={{
                   backgroundColor: color,
                   borderColor: toolProperties.brushColor === color ? '#007bff' : '#e2e8f0'
                 }}
@@ -130,8 +128,8 @@ export function PaintToolWindow() {
             style={{
               width: Math.min(toolProperties.brushSize || 5, 40),
               height: Math.min(toolProperties.brushSize || 5, 40),
-              backgroundColor: activeTool === 'brush' 
-                ? toolProperties.brushColor || '#000000' 
+              backgroundColor: activeTool === 'brush'
+                ? toolProperties.brushColor || '#000000'
                 : '#ffffff',
               opacity: toolProperties.brushOpacity || 1,
               border: activeTool === 'eraser' ? '2px dashed #666' : 'none'
@@ -147,10 +145,10 @@ export function PaintToolWindow() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => updateToolProperties({ 
-              brushSize: 2, 
-              brushColor: '#000000', 
-              brushOpacity: 1 
+            onClick={() => updateToolProperties({
+              brushSize: 2,
+              brushColor: '#000000',
+              brushOpacity: 1
             })}
           >
             Fine Line
@@ -158,10 +156,10 @@ export function PaintToolWindow() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => updateToolProperties({ 
-              brushSize: 20, 
-              brushColor: '#000000', 
-              brushOpacity: 0.5 
+            onClick={() => updateToolProperties({
+              brushSize: 20,
+              brushColor: '#000000',
+              brushOpacity: 0.5
             })}
           >
             Soft Brush

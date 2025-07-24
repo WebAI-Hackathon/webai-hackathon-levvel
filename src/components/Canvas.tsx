@@ -15,6 +15,7 @@ import {
   Redo,
   Trash2,
 } from "lucide-react";
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 export type EditorMode = "image" | "meme" | "story" | "comic";
 export type Tool = "select" | "brush" | "rectangle" | "circle" | "text" | "eraser";
@@ -64,19 +65,19 @@ const Canvas = ({ mode, activeTool, onToolChange, imageFile }: CanvasProps) => {
       if (e.target?.result) {
         try {
           const imgElement = await FabricImage.fromURL(e.target.result as string);
-          
+
           // Scale image to fit canvas
           const scaleX = fabricCanvas.width! / imgElement.width!;
           const scaleY = fabricCanvas.height! / imgElement.height!;
           const scale = Math.min(scaleX, scaleY);
-          
+
           imgElement.scale(scale);
           imgElement.set({
             left: (fabricCanvas.width! - imgElement.width! * scale) / 2,
             top: (fabricCanvas.height! - imgElement.height! * scale) / 2,
             selectable: false,
           });
-          
+
           fabricCanvas.add(imgElement);
           fabricCanvas.renderAll();
         } catch (error) {
@@ -93,7 +94,7 @@ const Canvas = ({ mode, activeTool, onToolChange, imageFile }: CanvasProps) => {
     if (!fabricCanvas) return;
 
     fabricCanvas.isDrawingMode = activeTool === "brush" || activeTool === "eraser";
-    
+
     if (fabricCanvas.freeDrawingBrush) {
       fabricCanvas.freeDrawingBrush.color = activeTool === "eraser" ? "#ffffff" : brushColor;
       fabricCanvas.freeDrawingBrush.width = brushSize;
@@ -186,7 +187,7 @@ const Canvas = ({ mode, activeTool, onToolChange, imageFile }: CanvasProps) => {
             </Button>
           ))}
         </div>
-        
+
         <div className="flex items-center space-x-4">
           {/* Brush Settings */}
           {(activeTool === "brush" || activeTool === "eraser") && (
@@ -203,21 +204,16 @@ const Canvas = ({ mode, activeTool, onToolChange, imageFile }: CanvasProps) => {
                 />
                 <span className="text-sm font-mono w-8">{brushSize}</span>
               </div>
-              
+
               {activeTool === "brush" && (
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-muted-foreground">Color:</span>
-                  <input
-                    type="color"
-                    value={brushColor}
-                    onChange={(e) => setBrushColor(e.target.value)}
-                    className="w-8 h-8 rounded border border-border"
-                  />
+                  <ColorPicker activeColor={brushColor} onColorChange={setBrushColor} />
                 </div>
               )}
             </>
           )}
-          
+
           <div className="flex items-center space-x-1">
             <Button variant="ghost" size="sm" onClick={handleUndo}>
               <Undo className="w-4 h-4" />

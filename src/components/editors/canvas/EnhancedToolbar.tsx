@@ -21,6 +21,7 @@ import {
 import { toast } from "sonner";
 import { ToolPopover } from "./ToolPopover";
 import {Line} from "react-konva";
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 interface EnhancedToolbarProps {
   activeTool: string;
@@ -173,7 +174,7 @@ export const EnhancedToolbar = ({
   const drawingTools = tools.filter(tool => tool.category === "drawing");
   const contentTools = tools.filter(tool => tool.category === "content");
   const shapeTools = tools.filter(tool => tool.category === "shapes");
-  const advancedTools = tools.filter(tool => tool.category === "advanced");
+  // const advancedTools = tools.filter(tool => tool.category === "advanced");
 
   const renderToolGroup = (toolGroup: typeof tools, title: string) => (
     <div className="space-y-2">
@@ -341,12 +342,9 @@ export const EnhancedToolbar = ({
         </div>
 
         <div className="flex items-center gap-2">
-          <input
-            type="color"
-            value={activeColor}
-            onChange={(e) => onColorChange(e.target.value)}
-            className="w-8 h-8 rounded border cursor-pointer"
-          />
+          <div>
+            <ColorPicker activeColor={activeColor} onColorChange={onColorChange} />
+          </div>
           <span className="text-xs text-muted-foreground flex-1">{activeColor}</span>
         </div>
       </div>

@@ -5,13 +5,13 @@ import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { 
-  MousePointer, 
-  Paintbrush, 
-  Square, 
-  Circle as CircleIcon, 
-  Type, 
-  RotateCcw, 
+import {
+  MousePointer,
+  Paintbrush,
+  Square,
+  Circle as CircleIcon,
+  Type,
+  RotateCcw,
   RotateCw,
   Trash2,
   Download,
@@ -20,6 +20,7 @@ import {
 import { ProjectFile } from '@/types/project';
 import { GridOverlay } from './GridOverlay';
 import { cn } from '@/lib/utils';
+import ColorPicker from "@/components/ColorPicker.tsx";
 
 interface ImageEditorProps {
   file?: ProjectFile;
@@ -60,7 +61,7 @@ export function ImageEditor({ file }: ImageEditorProps) {
     if (!fabricCanvas) return;
 
     fabricCanvas.isDrawingMode = activeTool === 'brush';
-    
+
     if (activeTool === 'brush') {
       fabricCanvas.freeDrawingBrush.color = brushColor;
       fabricCanvas.freeDrawingBrush.width = brushSize;
@@ -193,13 +194,7 @@ export function ImageEditor({ file }: ImageEditorProps) {
             </div>
             <div>
               <Label htmlFor="brush-color" className="text-xs">Color</Label>
-              <Input
-                id="brush-color"
-                type="color"
-                value={brushColor}
-                onChange={(e) => setBrushColor(e.target.value)}
-                className="h-8 w-full mt-1"
-              />
+              <ColorPicker activeColor={brushColor} onColorChange={setBrushColor} />
             </div>
           </div>
         </div>
