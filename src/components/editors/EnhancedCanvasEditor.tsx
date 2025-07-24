@@ -15,7 +15,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { EditorProject } from "@/types/editor";
-import {generateImageDescription} from "@/utils/aiHelpers.ts";
+import {generateImage, generateImageDescription} from "@/utils/aiHelpers.ts";
 import {
   ResizableHandle,
   ResizablePanel,
@@ -39,6 +39,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
   const [selectedObject, setSelectedObject] = useState<any>(null);
   const [hasImage, setHasImage] = useState(false);
   const [zoom, setZoom] = useState(100);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   useEffect(() => {
     if (!canvas) return;
@@ -68,6 +69,54 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
 
     toast.success("Canvas ready! Start creating your artwork.");
   }, []);
+
+  const handleGenerateImage = useCallback(async (prompt: string) => {
+    setIsGeneratingImage(true);
+    generateImage(prompt).then((imageUrl) => {
+        setIsGeneratingImage(false);
+        if (!canvas) return;
+
+        const imgElement = new Image();
+        imgElement.src = `data:image/png;base64,${imageUrl}`;
+        imgElement.onload = () => {
+            const fabricImg = new FabricImage(imgElement, {
+            left: 0,
+            top: 0,
+            selectable: true,
+            });
+
+            // Scale image to fit canvas while maintaining aspect ratio
+            const canvasWidth = canvas.width || width;
+            const canvasHeight = canvas.height || height;
+            const imgWidth = imgElement.naturalWidth;
+            const imgHeight = imgElement.naturalHeight;
+
+            const scale = Math.min(canvasWidth / imgWidth, canvasHeight / imgHeight, 1);
+            fabricImg.scale(scale);
+
+            // Center the image
+            fabricImg.set({
+            left: (canvasWidth - imgWidth * scale) / 2,
+            top: (canvasHeight - imgHeight * scale) / 2,
+            });
+
+            canvas.add(fabricImg);
+            canvas.setActiveObject(fabricImg);
+            canvas.renderAll();
+
+            generateImageDescription(imgElement.src).then(description => {
+                fabricImg.set({
+                    imageDescription: description,
+                });
+                canvas.renderAll();
+                toast.success("Image description generated successfully!");
+            })
+
+            setHasImage(true);
+            toast.success("Image generated and loaded successfully!");
+        };
+    })
+  }, [canvas, height, width]);
 
   const handleImageUpload = useCallback((file: File) => {
     if (!canvas) return;
@@ -169,6 +218,8 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
           onStrokeWidthChange={setStrokeWidth}
           canvas={canvas}
           onImageUpload={handleImageUpload}
+          onGenerateImage={handleGenerateImage}
+          isGeneratingImage={isGeneratingImage}
         />
       </ResizablePanel>
       <ResizableHandle withHandle />

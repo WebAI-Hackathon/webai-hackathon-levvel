@@ -56,7 +56,8 @@ export async function generateImage(prompt: string): Promise<string> {
             model: "hackathon/text2image",
             prompt: prompt,
             n: 1,
-            size: "1024x1024"
+            size: "1024x1024",
+            quality: "low",
         })
     });
 

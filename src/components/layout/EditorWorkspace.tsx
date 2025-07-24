@@ -365,7 +365,13 @@ export function EditorWorkspace({ project, selectedFile }: EditorWorkspaceProps)
             </TabsTrigger>
           </TabsList>
           {tabs.map((tab) => (
-            <TabsContent key={tab.id} value={tab.id} className="flex-1 min-h-0">
+            <TabsContent
+              key={tab.id}
+              value={tab.id}
+              className="flex-1 m-0 data-[state=inactive]:hidden overflow-auto"
+              forceMount
+              hidden={tab.id !== activeTabId}
+            >
               {renderEditor(tab)}
             </TabsContent>
           ))}

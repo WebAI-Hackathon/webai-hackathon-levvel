@@ -549,7 +549,6 @@ export const EnhancedEditorCanvas = ({
           const line = obj as Line;
           return `Line Object id = ${index + 1} from (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2}) stroke: ${line.stroke}, strokeWidth: ${line.strokeWidth}, rotation: ${line.angle}°`;
         } else {
-          console.log(obj.type);
           return `Object id = ${index + 1} of type ${obj.type}`;
         }
       }).join("\n");
