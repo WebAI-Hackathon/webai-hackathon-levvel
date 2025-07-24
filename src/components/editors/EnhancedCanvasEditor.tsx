@@ -230,7 +230,6 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
               canvas={canvas}
               activeTool={activeTool}
               selectedObject={selectedObject}
-              setSelectedObject={setSelectedObject}
               canvasObjects={fabricObjects}
             />
           </div>

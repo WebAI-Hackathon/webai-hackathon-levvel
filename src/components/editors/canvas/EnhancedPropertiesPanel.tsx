@@ -33,7 +33,6 @@ interface EnhancedPropertiesPanelProps {
   canvasObjects?: FabricObject[];
   activeTool: string;
   selectedObject?: any;
-  setSelectedObject?: (obj: any) => void;
 }
 
 interface FilterSettings {
@@ -55,7 +54,7 @@ const filterPresets = [
   { name: "Dramatic", filters: { brightness: -10, contrast: 40, saturation: 20, hue: 0, blur: 0, sepia: 0, grayscale: 0 } },
 ];
 
-export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject, setSelectedObject }: EnhancedPropertiesPanelProps) => {
+export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: EnhancedPropertiesPanelProps) => {
   const [filters, setFilters] = useState<FilterSettings>({
     brightness: 0,
     contrast: 0,
