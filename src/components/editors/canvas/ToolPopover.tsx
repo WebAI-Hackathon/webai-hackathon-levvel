@@ -5,10 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { Type, Paintbrush, Square, Circle } from "lucide-react";
+import {Type, Paintbrush, Square, Circle, Slash, Triangle} from "lucide-react";
 
 interface ToolPopoverProps {
   tool: string;
+  isOpen: boolean;
   activeColor: string;
   onColorChange: (color: string) => void;
   brushSize: number;
@@ -22,6 +23,7 @@ interface ToolPopoverProps {
 
 export const ToolPopover = ({
   tool,
+  isOpen,
   activeColor,
   onColorChange,
   brushSize,
@@ -32,7 +34,6 @@ export const ToolPopover = ({
   onStrokeWidthChange,
   children
 }: ToolPopoverProps) => {
-  const [open, setOpen] = useState(false);
 
   const getToolIcon = () => {
     switch (tool) {
@@ -40,6 +41,8 @@ export const ToolPopover = ({
       case "text": return <Type className="h-4 w-4" />;
       case "rectangle": return <Square className="h-4 w-4" />;
       case "circle": return <Circle className="h-4 w-4" />;
+      case "line": return <Slash className="h-4 w-4" />;
+      case "triangle": return <Triangle className="h-4 w-4" />;
       default: return null;
     }
   };
@@ -50,37 +53,35 @@ export const ToolPopover = ({
       case "text": return "Text";
       case "rectangle": return "Rectangle";
       case "circle": return "Circle";
+      case "line": return "Line";
+      case "triangle": return "Triangle";
       default: return "Tool";
     }
   };
 
-  const shouldShowPopover = ["draw", "text", "rectangle", "circle"].includes(tool);
+  const shouldShowPopover = ["draw", "text", "rectangle", "circle", "line", "triangle"].includes(tool);
 
   if (!shouldShowPopover) {
     return <>{children}</>;
   }
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={isOpen}>
       <PopoverTrigger asChild>
-        <div onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)}>
-          {children}
-        </div>
+        {children}
       </PopoverTrigger>
-      <PopoverContent 
-        side="right" 
+      <PopoverContent
+        side="right"
         className="w-64 ml-2"
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
       >
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             {getToolIcon()}
             <span className="font-medium">{getToolName()} Settings</span>
           </div>
-          
+
           <Separator />
-          
+
           {/* Color Picker */}
           <div>
             <Label className="text-sm">Color</Label>
@@ -130,8 +131,7 @@ export const ToolPopover = ({
             </div>
           )}
 
-          {(tool === "rectangle" || tool === "circle") && (
-            <>
+          {(tool === "rectangle" || tool === "circle" || tool === "triangle") && (
               <div>
                 <Label className="text-sm">Fill Color</Label>
                 <div className="flex items-center gap-2 mt-1">
@@ -144,19 +144,21 @@ export const ToolPopover = ({
                   <span className="text-xs text-muted-foreground">Fill</span>
                 </div>
               </div>
-              
+
+          )}
+
+          {(tool === "rectangle" || tool === "circle" || tool === "triangle" || tool === "line") && (
               <div>
                 <Label className="text-sm">Stroke Width: {strokeWidth}px</Label>
                 <Slider
-                  value={[strokeWidth]}
-                  onValueChange={([value]) => onStrokeWidthChange(value)}
-                  min={0}
-                  max={10}
-                  step={1}
-                  className="mt-2"
+                    value={[strokeWidth]}
+                    onValueChange={([value]) => onStrokeWidthChange(value)}
+                    min={0}
+                    max={10}
+                    step={1}
+                    className="mt-2"
                 />
               </div>
-            </>
           )}
         </div>
       </PopoverContent>

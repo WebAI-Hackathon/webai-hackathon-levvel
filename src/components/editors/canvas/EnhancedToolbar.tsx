@@ -192,6 +192,7 @@ export const EnhancedToolbar = ({
             onFontSizeChange={onFontSizeChange}
             strokeWidth={strokeWidth}
             onStrokeWidthChange={onStrokeWidthChange}
+            isOpen={activeTool === tool.id}
           >
             <Button
               variant={activeTool === tool.id ? "default" : "ghost"}
