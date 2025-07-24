@@ -37,6 +37,19 @@ export function EditorWorkspace({ project, selectedFile }: EditorWorkspaceProps)
   const { canUndo, canRedo, undo, redo, getHistoryPreview } = useHistoryManager();
   const [tabs, setTabs] = useState<EditorTab[]>([welcomeTab]);
 
+  useEffect(() => {
+    if (activeTabId === "new-tab") {
+      const newTab: EditorTab = {
+        id: `new-${Date.now()}`,
+        title: 'New Canvas',
+        type: 'canvas',
+        isDirty: false,
+      };
+      setTabs(prev => [...prev, newTab]);
+      setActiveTabId(newTab.id);
+    }
+  }, [activeTabId]);
+
   // Helper function to safely format dates
   const formatDate = (date: any): string => {
     if (!date) return 'Unknown';
@@ -116,7 +129,7 @@ export function EditorWorkspace({ project, selectedFile }: EditorWorkspaceProps)
     setTabs(newTabs);
 
     if (activeTabId === tabId && newTabs.length > 0) {
-      setActiveTabId(newTabs[0].id);
+      setActiveTabId(newTabs[newTabs.length - 1].id);
     }
   };
 
