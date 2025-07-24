@@ -473,8 +473,114 @@ export const useProjectStore = create<ProjectState>()(
       },
 
       moveFile: (fileId, newParentId) => {
-        // TODO: Implement file moving logic
-        console.log('Move file:', { fileId, newParentId });
+        const { currentProject } = get();
+        if (!currentProject) return;
+
+        // Check if the move is valid (not moving to itself)
+        if (fileId === newParentId) return;
+
+        let fileToMove: ProjectFile | null = null;
+        
+        // Helper function to check if target is a descendant of the file being moved
+        const isDescendant = (parentFile: ProjectFile, targetId: string | null): boolean => {
+          if (!targetId) return false;
+          if (parentFile.id === targetId) return true;
+          if (parentFile.children) {
+            return parentFile.children.some(child => isDescendant(child, targetId));
+          }
+          return false;
+        };
+
+        // Find the file to move first to validate the operation
+        const findFile = (files: ProjectFile[]): ProjectFile | null => {
+          for (const file of files) {
+            if (file.id === fileId) {
+              return file;
+            }
+            if (file.children) {
+              const found = findFile(file.children);
+              if (found) return found;
+            }
+          }
+          return null;
+        };
+
+        fileToMove = findFile(currentProject.files);
+        if (!fileToMove) return;
+
+        // Prevent moving a folder into its own descendant
+        if (fileToMove.type === 'folder' && isDescendant(fileToMove, newParentId)) {
+          console.warn('Cannot move folder into its own descendant');
+          return;
+        }
+        
+        // Find and extract the file from its current location
+        const removeFileFromTree = (files: ProjectFile[]): ProjectFile[] => {
+          return files.filter(file => {
+            if (file.id === fileId) {
+              return false;
+            }
+            if (file.children) {
+              file.children = removeFileFromTree(file.children);
+            }
+            return true;
+          });
+        };
+
+        // Add file to new parent location
+        const addFileToTree = (files: ProjectFile[], targetParentId: string | null): ProjectFile[] => {
+          if (!fileToMove) return files;
+          
+          if (targetParentId === null) {
+            // Moving to root level
+            const updatedFile = {
+              ...fileToMove,
+              parentId: undefined,
+              path: `/${fileToMove.name}`,
+              metadata: {
+                ...fileToMove.metadata,
+                lastModified: new Date()
+              }
+            };
+            return [...files, updatedFile];
+          }
+          
+          return files.map(file => {
+            if (file.id === targetParentId && file.type === 'folder') {
+              const updatedFile = {
+                ...fileToMove,
+                parentId: targetParentId,
+                path: `${file.path}/${fileToMove.name}`,
+                metadata: {
+                  ...fileToMove.metadata,
+                  lastModified: new Date()
+                }
+              };
+              return {
+                ...file,
+                children: [...(file.children || []), updatedFile],
+                metadata: {
+                  ...file.metadata,
+                  lastModified: new Date()
+                }
+              };
+            }
+            if (file.children) {
+              return {
+                ...file,
+                children: addFileToTree(file.children, targetParentId)
+              };
+            }
+            return file;
+          });
+        };
+        
+        // Extract file from current location
+        let updatedFiles = removeFileFromTree([...currentProject.files]);
+        
+        // Add file to new location
+        updatedFiles = addFileToTree(updatedFiles, newParentId);
+        get().updateProject({ files: updatedFiles });
       }
     }),
     {

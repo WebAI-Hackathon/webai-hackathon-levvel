@@ -59,6 +59,7 @@ function FileTreeItem({
   expandedIds: Set<string>;
   onToggleExpanded: (id: string) => void;
 }) {
+  const [isDragOver, setIsDragOver] = useState(false);
   const hasChildren = file.children && file.children.length > 0;
   const isExpanded = expandedIds.has(file.id);
   const isSelected = selectedFileId === file.id;
@@ -74,11 +75,18 @@ function FileTreeItem({
     if (file.type !== 'folder') return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    if (file.type !== 'folder') return;
+    setIsDragOver(false);
   };
 
   const handleDrop = (e: React.DragEvent) => {
     if (file.type !== 'folder') return;
     e.preventDefault();
+    setIsDragOver(false);
     const draggedFileId = e.dataTransfer.getData('text/plain');
     if (draggedFileId && draggedFileId !== file.id && onFileMove) {
       onFileMove(draggedFileId, file.id);
@@ -91,6 +99,7 @@ function FileTreeItem({
         className={cn(
           "flex items-center gap-1 px-2 py-1 text-sm cursor-pointer hover:bg-accent rounded-sm group",
           isSelected && "bg-accent text-accent-foreground",
+          isDragOver && file.type === 'folder' && "bg-blue-100 dark:bg-blue-900/30 border-2 border-blue-400 border-dashed",
           getFileTypeColor(file.type)
         )}
         style={{ paddingLeft: `${8 + level * 16}px` }}
@@ -98,6 +107,7 @@ function FileTreeItem({
         draggable={file.type !== 'folder'}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
         onDrop={handleDrop}
       >
         {hasChildren ? (
@@ -164,6 +174,7 @@ export function ProjectExplorer({
   isCollapsed = false 
 }: ProjectExplorerProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['root']));
+  const [isRootDragOver, setIsRootDragOver] = useState(false);
 
   const toggleExpanded = (id: string) => {
     const newExpanded = new Set(expandedIds);
@@ -173,6 +184,28 @@ export function ProjectExplorer({
       newExpanded.add(id);
     }
     setExpandedIds(newExpanded);
+  };
+
+  const handleRootDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsRootDragOver(true);
+  };
+
+  const handleRootDragLeave = (e: React.DragEvent) => {
+    // Only set to false if we're actually leaving the container
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsRootDragOver(false);
+    }
+  };
+
+  const handleRootDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsRootDragOver(false);
+    const draggedFileId = e.dataTransfer.getData('text/plain');
+    if (draggedFileId && onFileMove) {
+      onFileMove(draggedFileId, null); // null means root level
+    }
   };
 
   if (isCollapsed) {
@@ -200,7 +233,15 @@ export function ProjectExplorer({
       </div>
       
       <ScrollArea className="flex-1">
-        <div className="p-1 group">
+        <div 
+          className={cn(
+            "p-1 group min-h-full",
+            isRootDragOver && "bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-400 border-dashed rounded-md"
+          )}
+          onDragOver={handleRootDragOver}
+          onDragLeave={handleRootDragLeave}
+          onDrop={handleRootDrop}
+        >
           {files.map(file => (
             <FileTreeItem
               key={file.id}
@@ -208,6 +249,7 @@ export function ProjectExplorer({
               selectedFileId={selectedFileId}
               onFileSelect={onFileSelect}
               onFileCreate={onFileCreate}
+              onFileMove={onFileMove}
               expandedIds={expandedIds}
               onToggleExpanded={toggleExpanded}
             />
