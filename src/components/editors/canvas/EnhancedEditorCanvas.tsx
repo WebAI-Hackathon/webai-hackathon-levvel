@@ -275,7 +275,6 @@ export const EnhancedEditorCanvas = ({
         console.log(obj.type);
         if (obj.isType("textbox")) {
           const textObj = obj as Textbox;
-          console.log("Text object found:", textObj.text);
           return `Text ${index + 1}: "${textObj.text}" at (${obj.left}, ${obj.top})`;
         } else if (obj.type === 'rect') {
           return `Rectangle ${index + 1} at (${obj.left}, ${obj.top}) with size ${obj.width}x${obj.height}`;
