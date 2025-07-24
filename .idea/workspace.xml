@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="c0de44ec-ac73-485f-b264-39f48d289666" name="Changes" comment="fix: Layer editing while generating description">
+      <change afterPath="$PROJECT_DIR$/.env.example" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/Tool.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/routes.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/utils/aiHelpers.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bun.lockb" beforeDir="false" afterPath="$PROJECT_DIR$/bun.lockb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/editors/EnhancedCanvasEditor.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/EnhancedCanvasEditor.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedEditorCanvas.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/editors/canvas/EnhancedEditorCanvas.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/tool-windows/ImageToolWindow.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/tool-windows/ImageToolWindow.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/vite-env.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/vite-env.d.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/vite.config.ts" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+        <option value="TypeScript JSX File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Laennart&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/WebAI-Hackathon/webai-hackathon-levvel.git&quot;,
+    &quot;accountId&quot;: &quot;4fbf5425-5d64-4f3f-9e12-c5caf0c97b4b&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 1
+}</component>
+  <component name="ProjectId" id="30HSw2idojnLlM8Hp1SkDGZuEh8" />
+  <component name="ProjectViewState">
+    <option name="autoscrollToSource" value="true" />
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;ide&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/lennart/Dev/Uni/sonstiges/webai-hackathon-2025&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Users/lennart/Dev/Uni/sonstiges/webai-hackathon-2025/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="ReactDesignerToolWindowState">
+    <option name="myId2Visible">
+      <map>
+        <entry key="com.intellij.reactbuddy.reactComponents" value="false" />
+        <entry key="com.intellij.reactbuddy.reactInspector" value="false" />
+        <entry key="com.intellij.reactbuddy.storybook" value="false" />
+      </map>
+    </option>
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/app" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-WS-251.27812.2" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="c0de44ec-ac73-485f-b264-39f48d289666" name="Changes" comment="" />
+      <created>1753283241699</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1753283241699</updated>
+      <workItem from="1753283243489" duration="12505000" />
+      <workItem from="1753296279748" duration="137000" />
+      <workItem from="1753296427659" duration="826000" />
+      <workItem from="1753297517729" duration="526000" />
+      <workItem from="1753342795164" duration="6000" />
+      <workItem from="1753352174439" duration="1806000" />
+      <workItem from="1753354562236" duration="2430000" />
+      <workItem from="1753358819352" duration="398000" />
+    </task>
+    <task id="LOCAL-00001" summary="feat: Add Image canvas">
+      <option name="closed" value="true" />
+      <created>1753283508053</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1753283508053</updated>
+    </task>
+    <task id="LOCAL-00002" summary="feat: Canvas features">
+      <option name="closed" value="true" />
+      <created>1753283987300</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1753283987300</updated>
+    </task>
+    <task id="LOCAL-00003" summary="feat: Download">
+      <option name="closed" value="true" />
+      <created>1753284211641</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1753284211641</updated>
+    </task>
+    <task id="LOCAL-00004" summary="feat: Canvas layers">
+      <option name="closed" value="true" />
+      <created>1753284562954</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1753284562954</updated>
+    </task>
+    <task id="LOCAL-00005" summary="feat: Canvas layers">
+      <option name="closed" value="true" />
+      <created>1753285188491</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1753285188491</updated>
+    </task>
+    <task id="LOCAL-00006" summary="feat: Text options">
+      <option name="closed" value="true" />
+      <created>1753285335678</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1753285335678</updated>
+    </task>
+    <task id="LOCAL-00007" summary="feat: Rotation">
+      <option name="closed" value="true" />
+      <created>1753285799958</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1753285799958</updated>
+    </task>
+    <task id="LOCAL-00008" summary="fix: Rotation">
+      <option name="closed" value="true" />
+      <created>1753286608295</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1753286608295</updated>
+    </task>
+    <task id="LOCAL-00009" summary="feat: Delete layers">
+      <option name="closed" value="true" />
+      <created>1753286706515</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1753286706515</updated>
+    </task>
+    <task id="LOCAL-00010" summary="feat: Image border radius">
+      <option name="closed" value="true" />
+      <created>1753286798058</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1753286798058</updated>
+    </task>
+    <task id="LOCAL-00011" summary="fix: Handles">
+      <option name="closed" value="true" />
+      <created>1753290309509</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1753290309509</updated>
+    </task>
+    <task id="LOCAL-00012" summary="fix: Resizing rotated layers">
+      <option name="closed" value="true" />
+      <created>1753290681668</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1753290681668</updated>
+    </task>
+    <task id="LOCAL-00013" summary="feat: Rotation handles for images">
+      <option name="closed" value="true" />
+      <created>1753290792743</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1753290792743</updated>
+    </task>
+    <task id="LOCAL-00014" summary="fix: Layers">
+      <option name="closed" value="true" />
+      <created>1753291002527</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1753291002527</updated>
+    </task>
+    <task id="LOCAL-00015" summary="fix: Download">
+      <option name="closed" value="true" />
+      <created>1753291113030</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1753291113030</updated>
+    </task>
+    <task id="LOCAL-00016" summary="refactor: Image canvas">
+      <option name="closed" value="true" />
+      <created>1753291831758</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1753291831758</updated>
+    </task>
+    <task id="LOCAL-00017" summary="feat: Image descriptions and context">
+      <option name="closed" value="true" />
+      <created>1753296685363</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1753296685363</updated>
+    </task>
+    <task id="LOCAL-00018" summary="fix: Layer editing while generating description">
+      <option name="closed" value="true" />
+      <created>1753297247980</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1753297247980</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="feat: Add Image canvas" />
+    <MESSAGE value="feat: Canvas features" />
+    <MESSAGE value="feat: Download" />
+    <MESSAGE value="feat: Canvas layers" />
+    <MESSAGE value="feat: Text options" />
+    <MESSAGE value="feat: Rotation" />
+    <MESSAGE value="fix: Rotation" />
+    <MESSAGE value="feat: Delete layers" />
+    <MESSAGE value="feat: Image border radius" />
+    <MESSAGE value="fix: Handles" />
+    <MESSAGE value="fix: Resizing rotated layers" />
+    <MESSAGE value="feat: Rotation handles for images" />
+    <MESSAGE value="fix: Layers" />
+    <MESSAGE value="fix: Download" />
+    <MESSAGE value="refactor: Image canvas" />
+    <MESSAGE value="feat: Image descriptions and context" />
+    <MESSAGE value="fix: Layer editing while generating description" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: Layer editing while generating description" />
+  </component>
+</project>

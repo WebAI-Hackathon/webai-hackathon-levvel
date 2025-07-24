@@ -8,13 +8,14 @@ import { toast } from "sonner";
 import { EnhancedEditorCanvas } from "./canvas/EnhancedEditorCanvas";
 import { EnhancedToolbar } from "./canvas/EnhancedToolbar";
 import { EnhancedPropertiesPanel } from "./canvas/EnhancedPropertiesPanel";
-import { 
+import {
   ZoomIn,
   ZoomOut,
   Info,
   Sparkles
 } from "lucide-react";
 import { EditorProject } from "@/types/editor";
+import {generateImageDescription} from "@/utils/aiHelpers.ts";
 
 interface EnhancedCanvasEditorProps {
   project: EditorProject;
@@ -35,16 +36,16 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
 
   const handleCanvasReady = useCallback((fabricCanvas: FabricCanvas) => {
     setCanvas(fabricCanvas);
-    
+
     // Add event listeners
     fabricCanvas.on('selection:created', (e) => {
       setSelectedObject(e.selected?.[0]);
     });
-    
+
     fabricCanvas.on('selection:updated', (e) => {
       setSelectedObject(e.selected?.[0]);
     });
-    
+
     fabricCanvas.on('selection:cleared', () => {
       setSelectedObject(null);
     });
@@ -54,9 +55,9 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
 
   const handleImageUpload = useCallback((file: File) => {
     if (!canvas) return;
-    
+
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       const imgElement = new Image();
       imgElement.onload = () => {
         const fabricImg = new FabricImage(imgElement, {
@@ -87,6 +88,8 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
         toast.success("Image loaded successfully!");
       };
       imgElement.src = e.target?.result as string;
+
+      await generateImageDescription(imgElement.src);
     };
     reader.readAsDataURL(file);
   }, [canvas, width, height]);
@@ -161,7 +164,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
               )}
             </div>
           </div>
-          
+
           {/* Zoom Controls */}
           <div className="flex items-center gap-3">
             <Button
@@ -172,7 +175,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
             >
               <ZoomOut className="h-4 w-4" />
             </Button>
-            
+
             <div className="w-24">
               <Slider
                 value={[zoom]}
@@ -183,7 +186,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
                 className="w-full"
               />
             </div>
-            
+
             <Button
               size="sm"
               variant="outline"
@@ -192,7 +195,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
             >
               <ZoomIn className="h-4 w-4" />
             </Button>
-            
+
             <span className="text-sm text-muted-foreground min-w-[50px] text-center">
               {zoom}%
             </span>
@@ -216,7 +219,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
               />
             </div>
           </div>
-          
+
           {/* Right Properties Panel */}
           <div className="w-80 bg-card border-l border-border">
             <EnhancedPropertiesPanel
@@ -226,7 +229,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
             />
           </div>
         </div>
-        
+
         {/* Status Bar */}
         <div className="border-t border-border bg-card/50 backdrop-blur-sm px-6 py-2">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -236,7 +239,7 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
                 <span>Selected: <strong className="text-foreground">{selectedObject.type}</strong></span>
               )}
             </div>
-            
+
             <div className="flex items-center gap-4">
               <span>Canvas: {width}×{height}</span>
               <span className="text-primary">Ready</span>

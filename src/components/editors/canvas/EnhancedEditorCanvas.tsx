@@ -16,9 +16,9 @@ interface EnhancedEditorCanvasProps {
   height?: number;
 }
 
-export const EnhancedEditorCanvas = ({ 
-  onCanvasReady, 
-  activeTool = "select", 
+export const EnhancedEditorCanvas = ({
+  onCanvasReady,
+  activeTool = "select",
   activeColor = "#6366f1",
   brushSize = 5,
   fontSize = 20,
@@ -71,7 +71,7 @@ export const EnhancedEditorCanvas = ({
 
     fabricCanvas.isDrawingMode = activeTool === "draw";
     fabricCanvas.selection = activeTool === "select";
-    
+
     if (activeTool === "draw" && fabricCanvas.freeDrawingBrush) {
       fabricCanvas.freeDrawingBrush.color = activeColor;
       fabricCanvas.freeDrawingBrush.width = brushSize;
@@ -98,13 +98,13 @@ export const EnhancedEditorCanvas = ({
 
   const handleCanvasClick = useCallback((e: any) => {
     if (!fabricCanvas) return;
-    
+
     if (activeTool === "eraser" && e.target && e.target !== fabricCanvas) {
       fabricCanvas.remove(e.target);
       toast.success("Object removed");
       return;
     }
-    
+
     if (activeTool === "select" || activeTool === "draw") return;
 
     const pointer = fabricCanvas.getViewportPoint(e.e);
@@ -163,7 +163,7 @@ export const EnhancedEditorCanvas = ({
     if (!fabricCanvas) return;
 
     fabricCanvas.on("mouse:down", handleCanvasClick);
-    
+
     return () => {
       fabricCanvas.off("mouse:down", handleCanvasClick);
     };
@@ -200,7 +200,7 @@ export const EnhancedEditorCanvas = ({
           fabricCanvas.setActiveObject(fabricImg);
           fabricCanvas.renderAll();
           onImageLoad?.(fabricImg);
-          toast.success("Image loaded successfully!");
+          toast.success("Image loaded successfully (fabric)!");
         }
       };
       imgElement.src = e.target?.result as string;
@@ -213,7 +213,7 @@ export const EnhancedEditorCanvas = ({
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
     const imageFile = files.find(file => file.type.startsWith('image/'));
-    
+
     if (imageFile) {
       loadImageFromFile(imageFile);
     }
@@ -225,16 +225,16 @@ export const EnhancedEditorCanvas = ({
 
   return (
     <div className="flex flex-col">
-      <div 
+      <div
         className="relative border-2 border-dashed border-border/50 overflow-hidden bg-background rounded-lg shadow-lg"
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
-        <canvas 
-          ref={canvasRef} 
+        <canvas
+          ref={canvasRef}
           className="max-w-full block"
         />
-        
+
         {/* Drop overlay */}
         <div className="absolute inset-0 flex items-center justify-center bg-background/80 opacity-0 hover:opacity-100 pointer-events-none transition-opacity">
           <div className="text-center p-8">
@@ -247,7 +247,7 @@ export const EnhancedEditorCanvas = ({
           </div>
         </div>
       </div>
-      
+
       {/* Navigation Controls Footer */}
       <NavigationControls canvas={fabricCanvas} />
     </div>

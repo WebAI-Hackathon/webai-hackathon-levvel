@@ -16,11 +16,13 @@ export function ImageToolWindow() {
     const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
+        const imgSrc = e.target?.result as string;
         // TODO: Add image to canvas
         console.log('Image loaded:', e.target?.result);
       };
-      reader.readAsDataURL(file);
+       reader.readAsDataURL(file);
+
     }
   };
 
@@ -99,7 +101,7 @@ export function ImageToolWindow() {
       {/* Image Adjustments */}
       <div className="space-y-4">
         <Label className="text-sm font-medium">Adjustments</Label>
-        
+
         <div className="space-y-3">
           <div>
             <Label className="text-xs text-muted-foreground">
