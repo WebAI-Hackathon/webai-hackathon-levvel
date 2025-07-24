@@ -69,7 +69,7 @@ export const EnhancedEditorCanvas = ({
   const editTextBox = useCallback((index: number, text?: string, left?: number, top?: number, width?: number,
                                    rotation?: number, fontsize?: number, color?: string,
                                    fontAlignment?: "left" | "center" | "right", bold?: boolean, italic?: boolean,
-                                   underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, borderColor?: string, strokeWidth?: number) => {
+                                   underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, borderColor?: string, strokeWidth?: number, strokeColor?: string) => {
     if (fabricCanvas && fabricObjects[index - 1] && fabricObjects[index - 1].isType("textbox")) {
       const textBox = fabricObjects[index - 1];
 
@@ -131,6 +131,10 @@ export const EnhancedEditorCanvas = ({
 
         if (strokeWidth !== undefined) {
           textBox.set("strokeWidth", strokeWidth);
+        }
+
+        if (strokeColor !== undefined) {
+          textBox.set("stroke", strokeColor);
         }
 
         // Update the object in the fabricObjects array
@@ -531,19 +535,19 @@ export const EnhancedEditorCanvas = ({
       filteredObjects.map((obj, index) => {
         if (obj.isType("textbox")) {
           const textObj = obj as Textbox;
-          return `Text Object id = ${index}: "${textObj.text}" at (X: ${obj.left}, Y: ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height})`;
+          return `Text Object id = ${index + 1}: "${textObj.text}" at (X: ${obj.left}, Y: ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) color: ${textObj.fill}, fontSize: ${textObj.fontSize}, fontFamily: ${textObj.fontFamily}, rotation: ${textObj.angle}°`;
         } else if (obj.isType('rect')) {
-          return `Rectangle Object id = ${index} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height})`;
+          return `Rectangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
         } else if (obj.isType('circle')) {
-          return `Circle Object id = ${index} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height})`;
+          return `Circle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
         } else if (obj.isType("image")) {
           const imageDescription = obj?.["imageDescription"] || "No description";
-          return `Image Object id = ${index} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) with description: "${imageDescription}"`;
+          return `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) with description: "${imageDescription}"`;
         } else if (obj.isType("triangle")) {
-          return `Triangle Object id = ${index} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height})`;
+          return `Triangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
         } else if (obj.isType("line")) {
           const line = obj as Line;
-          return `Line Object id = ${index + 1} from (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2})`;
+          return `Line Object id = ${index + 1} from (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2}) stroke: ${line.stroke}, strokeWidth: ${line.strokeWidth}, rotation: ${line.angle}°`;
         } else {
           console.log(obj.type);
           return `Object id = ${index + 1} of type ${obj.type}`;
@@ -636,6 +640,7 @@ export const EnhancedEditorCanvas = ({
               <prop name="fontfamily" type="string" description="Schriftfamilie" />
               <prop name="borderColor" type="string" description="Rahmenfarbe" />
               <prop name="strokeWidth" type="number" description="Linienstärke des Rahmens" />
+              <prop name="strokeColor" type="string" description="Farbe der Umrandung" />
           </Tool>
 
           <Tool
