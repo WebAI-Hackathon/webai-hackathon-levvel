@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Canvas as FabricCanvas, FabricObject, Image as FabricImage, filters as ImageFilters } from "fabric";
+import {Canvas as FabricCanvas, FabricObject, Image as FabricImage, filters as ImageFilters, Textbox} from "fabric";
 
 import {
   Palette,
@@ -22,7 +22,7 @@ import {
   Circle,
   Settings,
   Filter,
-  Layers, RotateCcw
+  Layers, RotateCcw, Eye, EyeOff, Trash, LoaderCircle, Check
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -439,6 +439,108 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
     }
   };
 
+  const getLayerName = (layer: FabricObject, index: number) => {
+    if (layer.isType("textbox")) {
+      const textbox = layer as Textbox;
+      return (
+          <span className="flex items-center gap-2">
+            <Type />
+            <span>{textbox.text || `Text Layer ${index + 1}`}</span>
+          </span>
+      );
+    } else if (layer.isType("image")) {
+        const image = layer as FabricImage;
+        return (
+            <span className="flex items-center gap-2">
+                <img src={image.getSrc()} alt={`Image Layer ${index + 1}`} className="h-4 w-4 object-cover" />
+                <span>{`Image ${index + 1}`}</span>
+              {image.imageDescription ? (
+                  <Check />
+                  ) : (
+                  <LoaderCircle className="h-4 w-4 animate-spin text-muted-foreground" />
+              )}
+        </span>
+        );
+    } else if (layer.isType("rect")) {
+        return (
+            <span className="flex items-center gap-2">
+            <Square />
+            <span>{`Rectangle ${index + 1}`}</span>
+            </span>
+        );
+    } else if (layer.isType("circle")) {
+        return (
+            <span className="flex items-center gap-2">
+            <Circle />
+            <span>{`Circle ${index + 1}`}</span>
+            </span>
+        );
+    }
+    return `Layer ${index + 1}`;
+  }
+
+  const renderLayersPanel = () => {
+    if (!canvas) {
+      return (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <Layers className="h-12 w-12 text-muted-foreground mb-4" />
+            <p className="text-center text-muted-foreground">
+              No canvas available. Please create or load a canvas to manage layers.
+            </p>
+          </CardContent>
+        </Card>
+      );
+    }
+
+    const layers = canvas.getObjects();
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Layers className="h-5 w-5" />
+            Layers
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {layers.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No layers available.</p>
+          ) : (
+            layers.map((layer, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <span>{getLayerName(layer, index)}</span>
+                <div>
+                  <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        canvas.remove(layer);
+                        canvas.renderAll();
+                        toast.success(`Removed ${layer.type} layer`);
+                      }}
+                  >
+                    <Trash color="red"/>
+                  </Button>
+                  <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        layer.set('visible', !layer.visible);
+                        canvas.renderAll();
+                      }}
+                  >
+                    {layer.visible ? <Eye /> : <EyeOff />}
+                  </Button>
+                </div>
+
+              </div>
+            ))
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+
   const renderFilterPanel = () => {
     if (!selectedObject || selectedObject.type !== 'image') {
       return (
@@ -594,25 +696,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject }: 
         </TabsContent>
 
         <TabsContent value="layers" className="m-0 h-[calc(100%-60px)] overflow-y-auto p-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Layers className="h-5 w-5" />
-                Layer Management
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Layer management features will be available here, including:
-              </p>
-              <ul className="text-sm text-muted-foreground mt-2 space-y-1">
-                <li>• Layer ordering</li>
-                <li>• Visibility toggle</li>
-                <li>• Layer grouping</li>
-                <li>• Blend modes</li>
-              </ul>
-            </CardContent>
-          </Card>
+          {renderLayersPanel()}
         </TabsContent>
       </Tabs>
     </div>

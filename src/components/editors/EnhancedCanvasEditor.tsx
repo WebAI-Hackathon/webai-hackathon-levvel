@@ -92,15 +92,13 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
                 imageDescription: description,
             });
             canvas.renderAll();
+            toast.success("Image description generated successfully!");
         })
 
         setHasImage(true);
         toast.success("Image loaded successfully!");
-
-
       };
       imgElement.src = imgSrc;
-      await generateImageDescription(imgElement.src);
     };
     reader.readAsDataURL(file);
   }, [canvas, width, height]);

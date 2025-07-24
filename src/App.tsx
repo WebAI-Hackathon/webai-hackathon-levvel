@@ -9,7 +9,6 @@ import FileManager from "./pages/FileManager";
 import Editor from "./pages/Editor";
 import NotFound from "./pages/NotFound";
 import IDE from "./pages/IDE";
-import {action as generateImageDescriptionAction} from "./pages/GenerateImageDescription.ts";
 
 const queryClient = new QueryClient();
 
