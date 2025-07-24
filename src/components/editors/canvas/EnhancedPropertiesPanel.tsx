@@ -22,7 +22,19 @@ import {
   Circle,
   Settings,
   Filter,
-  Layers, RotateCcw, Eye, EyeOff, Trash, LoaderCircle, Check
+  Layers,
+  RotateCcw,
+  Eye,
+  EyeOff,
+  Trash,
+  LoaderCircle,
+  Check,
+  Bold,
+  Italic,
+  Underline,
+  Strikethrough,
+  AlignLeft,
+  AlignCenter, AlignRight
 } from "lucide-react";
 import { toast } from "sonner";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip.tsx";
@@ -346,7 +358,7 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
                             canvas?.renderAll();
                             }}
                         >
-                            {align.charAt(0).toUpperCase() + align.slice(1)}
+                          {align === "left" ? <AlignLeft /> : align === "center" ? <AlignCenter /> : <AlignRight />}
                         </Button>
                         ))}
                     </div>
@@ -354,28 +366,91 @@ export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, sel
                 </div>
 
                 <div>
-                  <Label>Font Weight</Label>
-                  <div className="grid grid-cols-2 gap-2 mt-2">
-                    <Button
-                      variant={selectedObject.fontWeight === 'normal' ? 'default' : 'outline'}
-                      size="sm"
-                      onClick={() => {
-                        selectedObject.set('fontWeight', 'normal');
-                        canvas?.renderAll();
-                      }}
-                    >
-                      Normal
-                    </Button>
+                  <Label>Font Mode</Label>
+                  <div className="grid grid-cols-4 gap-2 mt-2">
                     <Button
                       variant={selectedObject.fontWeight === 'bold' ? 'default' : 'outline'}
                       size="sm"
                       onClick={() => {
-                        selectedObject.set('fontWeight', 'bold');
+                        selectedObject.set('fontWeight', selectedObject.fontWeight === 'bold' ? 'normal' : 'bold');
                         canvas?.renderAll();
                       }}
                     >
-                      Bold
+                      <Bold />
                     </Button>
+                    <Button
+                      variant={selectedObject.fontStyle === 'italic' ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        selectedObject.set('fontStyle', selectedObject.fontStyle === 'italic' ? 'normal' : 'italic');
+                        canvas?.renderAll();
+                      }}
+                    >
+                      <Italic />
+                    </Button>
+                    <Button
+                      variant={selectedObject.underline ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        selectedObject.set('underline', !selectedObject.underline);
+                        canvas?.renderAll();
+                      }}
+                    >
+                      <Underline />
+                    </Button>
+                    <Button
+                      variant={selectedObject.linethrough ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => {
+                        selectedObject.set('linethrough', !selectedObject.linethrough);
+                        canvas?.renderAll();
+                      }}
+                    >
+                      <Strikethrough />
+                    </Button>
+
+                  </div>
+
+                  <div className="mt-4">
+                    <Label className="mt-4">Font Family</Label>
+                    <Input
+                      type="text"
+                      value={selectedObject.fontFamily || 'Arial'}
+                      onChange={(e) => {
+                        selectedObject.set('fontFamily', e.target.value);
+                        canvas?.renderAll();
+                      }}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div className="mt-4">
+                    <Label>Border</Label>
+                    <Slider
+                      value={[selectedObject.strokeWidth || 0]}
+                      onValueChange={([value]) => {
+                        selectedObject.set('strokeWidth', value);
+                        canvas?.renderAll();
+                      }}
+                      min={0}
+                      max={20}
+                      step={1}
+                      className="mt-2"
+                    />
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Width:  {selectedObject.strokeWidth || 0}px
+                    </p>
+
+                    <input
+                      type="color"
+                      value={selectedObject.stroke || '#ffffff'}
+                      onChange={(e) => {
+                        selectedObject.set('stroke', e.target.value);
+                        canvas?.renderAll();
+                      }}
+                      className="w-full h-10 rounded border cursor-pointer mt-3"
+                    />
+
                   </div>
                 </div>
               </CardContent>
