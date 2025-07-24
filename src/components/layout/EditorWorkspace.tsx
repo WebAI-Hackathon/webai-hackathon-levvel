@@ -424,6 +424,8 @@ export function EditorWorkspace({ project, selectedFile }: EditorWorkspaceProps)
               key={tab.id}
               value={tab.id}
               className="flex-1 m-0 data-[state=inactive]:hidden overflow-auto"
+              forceMount
+              hidden={tab.id !== activeTabId}
             >
               {renderEditor(tab)}
             </TabsContent>
