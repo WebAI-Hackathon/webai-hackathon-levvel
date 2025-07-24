@@ -7,7 +7,7 @@ import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {Canvas as FabricCanvas, FabricObject, Image as FabricImage} from "fabric";
+import {Canvas as FabricCanvas, FabricObject, Image as FabricImage, Point} from "fabric";
 import {
   Palette,
   Sun,
@@ -215,7 +215,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject, se
                   type="number"
                   value={Math.round(selectedObject.left || 0)}
                   onChange={(e) => {
-                    setSelectedObject(selectedObject.set('left', Number(e.target.value)));
+                    selectedObject.set('left', Number(e.target.value)).setCoords();
                     canvas?.renderAll();
                   }}
                   className="h-8"
@@ -227,7 +227,7 @@ export const EnhancedPropertiesPanel = ({ canvas, activeTool, selectedObject, se
                   type="number"
                   value={Math.round(selectedObject.top || 0)}
                   onChange={(e) => {
-                    setSelectedObject(selectedObject.set('top', Number(e.target.value)));
+                    selectedObject.set('top', Number(e.target.value)).setCoords();
                     canvas?.renderAll();
                   }}
                   className="h-8"
