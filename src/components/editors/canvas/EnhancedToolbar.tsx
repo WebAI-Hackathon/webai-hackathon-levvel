@@ -207,7 +207,7 @@ export const EnhancedToolbar = ({
   );
 
   return (
-    <div className="bg-card border-r border-border w-64 flex flex-col py-4 space-y-4 overflow-y-auto">
+    <div className="bg-card border-r border-border w-full h-full flex flex-col py-4 space-y-4 overflow-y-auto">
       {/* File Operations */}
       <div className="px-4 space-y-2">
         <div className="text-xs text-muted-foreground font-medium">File</div>
