@@ -20,7 +20,10 @@ declare namespace JSX {
             description?: string;
         }, HTMLElement>;
 
-        'array': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {}, HTMLElement>;
+        'array': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+            name: string;
+            required?: boolean;
+        }, HTMLElement>;
         'dict': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {}, HTMLElement>;
     }
 }

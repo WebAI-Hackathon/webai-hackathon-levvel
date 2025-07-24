@@ -16,6 +16,11 @@ import {
 } from "lucide-react";
 import { EditorProject } from "@/types/editor";
 import {generateImageDescription} from "@/utils/aiHelpers.ts";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
 
 interface EnhancedCanvasEditorProps {
   project: EditorProject;
@@ -138,128 +143,114 @@ export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: Enh
   };
 
   return (
-    <div className="h-full flex bg-background">
+    <ResizablePanelGroup direction="horizontal" className="h-full flex bg-background">
       {/* Left Toolbar */}
-      <EnhancedToolbar
-        activeTool={activeTool}
-        onToolChange={setActiveTool}
-        activeColor={activeColor}
-        onColorChange={setActiveColor}
-        brushSize={brushSize}
-        onBrushSizeChange={setBrushSize}
-        fontSize={fontSize}
-        onFontSizeChange={setFontSize}
-        strokeWidth={strokeWidth}
-        onStrokeWidthChange={setStrokeWidth}
-        canvas={canvas}
-        onImageUpload={handleImageUpload}
-      />
+      <ResizablePanel defaultSize={15} minSize={10} maxSize={20}>
+        <EnhancedToolbar
+          activeTool={activeTool}
+          onToolChange={setActiveTool}
+          activeColor={activeColor}
+          onColorChange={setActiveColor}
+          brushSize={brushSize}
+          onBrushSizeChange={setBrushSize}
+          fontSize={fontSize}
+          onFontSizeChange={setFontSize}
+          strokeWidth={strokeWidth}
+          onStrokeWidthChange={setStrokeWidth}
+          canvas={canvas}
+          onImageUpload={handleImageUpload}
+        />
+      </ResizablePanel>
+      <ResizableHandle withHandle />
 
       {/* Main Canvas Area */}
-      <div className="flex-1 flex flex-col">
-        {/* Canvas Header */}
-        <div className="h-12 border-b border-border bg-card/50 backdrop-blur-sm px-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="gap-1">
-                <Sparkles className="h-3 w-3" />
-                Enhanced Canvas
-              </Badge>
-              {hasImage && (
-                <Badge variant="outline" className="gap-1">
-                  <Info className="h-3 w-3" />
-                  Image Loaded
+      <ResizablePanel defaultSize={65}>
+        <div className="flex-1 flex flex-col h-full">
+          {/* Canvas Header */}
+          <div className="h-12 border-b border-border bg-card/50 backdrop-blur-sm px-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  Enhanced Canvas
                 </Badge>
-              )}
+                {hasImage && (
+                  <Badge variant="outline" className="gap-1">
+                    <Info className="h-3 w-3" />
+                    Image Loaded
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Zoom Controls */}
+            <div className="flex items-center gap-3">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleZoomOut}
+                disabled={zoom <= 25}
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+
+              <div className="w-24">
+                <Slider
+                  value={[zoom]}
+                  onValueChange={handleZoomSlider}
+                  min={25}
+                  max={500}
+                  step={25}
+                  className="w-full"
+                />
+              </div>
+
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleZoomIn}
+                disabled={zoom >= 500}
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+
+              <span className="text-sm text-muted-foreground min-w-[50px] text-center">
+                {zoom}%
+              </span>
             </div>
           </div>
 
-          {/* Zoom Controls */}
-          <div className="flex items-center gap-3">
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleZoomOut}
-              disabled={zoom <= 25}
-            >
-              <ZoomOut className="h-4 w-4" />
-            </Button>
-
-            <div className="w-24">
-              <Slider
-                value={[zoom]}
-                onValueChange={handleZoomSlider}
-                min={25}
-                max={500}
-                step={25}
-                className="w-full"
-              />
-            </div>
-
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleZoomIn}
-              disabled={zoom >= 500}
-            >
-              <ZoomIn className="h-4 w-4" />
-            </Button>
-
-            <span className="text-sm text-muted-foreground min-w-[50px] text-center">
-              {zoom}%
-            </span>
-          </div>
-        </div>
-
-        {/* Canvas Content */}
-        <div className="flex-1 flex">
-          <div className="flex-1 p-6 flex items-center justify-center bg-gradient-to-br from-background to-muted/20">
-            <div className="w-full max-w-4xl">
+          {/* Canvas Content */}
+          <div className="flex-1 flex">
+            <div className="flex-1 p-6 flex items-center justify-center bg-gradient-to-br from-background to-muted/20">
               <EnhancedEditorCanvas
-                onCanvasReady={handleCanvasReady}
-                activeTool={activeTool}
-                activeColor={activeColor}
-                brushSize={brushSize}
-                fontSize={fontSize}
-                strokeWidth={strokeWidth}
-                onImageLoad={handleImageLoad}
-                width={width}
-                height={height}
-                setActiveTool={setActiveTool}
-                setFabricObjects={setFabricObjects}
-                fabricObjects={fabricObjects}
+                  onCanvasReady={handleCanvasReady}
+                  activeTool={activeTool}
+                  activeColor={activeColor}
+                  brushSize={brushSize}
+                  fontSize={fontSize}
+                  strokeWidth={strokeWidth}
+                  onImageLoad={handleImageLoad}
+                  width={width}
+                  height={height}
+                  setActiveTool={setActiveTool}
+                  setFabricObjects={setFabricObjects}
+                  fabricObjects={fabricObjects}
               />
             </div>
           </div>
-
-          {/* Right Properties Panel */}
-          <div className="w-80 bg-card border-l border-border">
-            <EnhancedPropertiesPanel
-              canvas={canvas}
-              activeTool={activeTool}
-              selectedObject={selectedObject}
-              canvasObjects={fabricObjects}
-            />
-          </div>
         </div>
-
-        {/* Status Bar */}
-        <div className="border-t border-border bg-card/50 backdrop-blur-sm px-6 py-2">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <span>Tool: <strong className="text-foreground">{activeTool}</strong></span>
-              {selectedObject && (
-                <span>Selected: <strong className="text-foreground">{selectedObject.type}</strong></span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <span>Canvas: {width}×{height}</span>
-              <span className="text-primary">Ready</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      </ResizablePanel>
+      <ResizableHandle withHandle />
+      {/* Right Properties Panel */}
+      <ResizablePanel defaultSize={20} minSize={15} maxSize={25}>
+        <EnhancedPropertiesPanel
+          canvas={canvas}
+          activeTool={activeTool}
+          selectedObject={selectedObject}
+          canvasObjects={fabricObjects}
+        />
+      </ResizablePanel>
+    </ResizablePanelGroup>
   );
 }
