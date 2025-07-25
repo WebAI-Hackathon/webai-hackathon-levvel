@@ -207,7 +207,7 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
           {/* Canvas Header */}
           <div className="h-12 border-b border-border bg-card/50 backdrop-blur-sm px-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 h-8">
                 <Badge variant="secondary" className="gap-1">
                   <Sparkles className="h-3 w-3" />
                   Enhanced Canvas
