@@ -700,7 +700,7 @@ export const EnhancedEditorCanvas = ({
           </context>
           <Tool
               name="add_text"
-              description="Fügt Text mit allen unterstützten Eigenschaften zur Leinwand hinzu"
+              description="Add a text box to the canvas with the specified properties"
               onCall={(event) => {
                   const {
                       text, left, top, width,
@@ -718,25 +718,25 @@ export const EnhancedEditorCanvas = ({
                   }
               }}
           >
-              <prop name="text" type="string" required description="Der hinzuzufügende Text" />
-              <prop name="left" type="number" required description="X-Position des Textes" />
-              <prop name="top" type="number" required description="Y-Position des Textes" />
-              <prop name="width" type="number" required description="Breite der Textbox" />
-              <prop name="rotation" type="number" description="Rotationswinkel in Grad" />
-              <prop name="fontsize" type="number" description="Schriftgröße" />
-              <prop name="color" type="string" description="Textfarbe im Hex-Format" />
-              <prop name="fontAlignment" type="string" description="Textausrichtung: left, center oder right" />
-              <prop name="bold" type="boolean" description="Fett" />
-              <prop name="italic" type="boolean" description="Kursiv" />
-              <prop name="underlined" type="boolean" description="Unterstrichen" />
-              <prop name="strikeThrough" type="boolean" description="Durchgestrichen" />
-              <prop name="fontfamily" type="string" description="Schriftfamilie" />
-              <prop name="borderColor" type="string" description="Rahmenfarbe" />
-              <prop name="strokeWidth" type="number" description="Linienstärke des Rahmens" />
+              <prop name="text" type="string" required description="The text that should be added" />
+              <prop name="left" type="number" required description="X-Position of the new text" />
+              <prop name="top" type="number" required description="Y-Position of the new text" />
+              <prop name="width" type="number" required description="Width of the textbox" />
+              <prop name="rotation" type="number" description="Rotation angle of the textbox in degrees" />
+              <prop name="fontsize" type="number" description="Font size of the textbox" />
+              <prop name="color" type="string" description="Text color of the new text in the format #rrggbb" />
+              <prop name="fontAlignment" type="string" description="The text alignment of the new text. Can be one of 'left', 'center', or 'right'" />
+              <prop name="bold" type="boolean" description="Whether the text should be bold" />
+              <prop name="italic" type="boolean" description="Whether the text should be italic" />
+              <prop name="underlined" type="boolean" description="Whether the text should be underlined" />
+              <prop name="strikeThrough" type="boolean" description="Whether the text should be striked through" />
+              <prop name="fontfamily" type="string" description="The font family of the text" />
+              <prop name="borderColor" type="string" description="The color of the stroke of the text" />
+              <prop name="strokeWidth" type="number" description="The width of the stroke of the text" />
           </Tool>
 
           <Tool name="edit_text"
-                description="Edit text on the canvas identifying with the id"
+                description="Edit text on the canvas identified with the id"
                 onCall={(event) => {
                     const {
                         id, text, left, top, width,
@@ -756,27 +756,27 @@ export const EnhancedEditorCanvas = ({
                 }}
           >
               <prop name="id" type="number" required description="ID of the to changing text box, the id stays the same after editing, take the same id" />
-              <prop name="text" type="string" description="Neuer Textinhalt" />
-              <prop name="left" type="number" description="Neue X-Position" />
-              <prop name="top" type="number" description="Neue Y-Position" />
-              <prop name="width" type="number" description="Neue Breite der Textbox" />
-              <prop name="rotation" type="number" description="Neuer Rotationswinkel in Grad" />
-              <prop name="fontsize" type="number" description="Neue Schriftgröße" />
-              <prop name="color" type="string" description="Neue Textfarbe im Hex-Format" />
-              <prop name="fontAlignment" type="string" description="Textausrichtung: left, center oder right" />
-              <prop name="bold" type="boolean" description="Fett" />
-              <prop name="italic" type="boolean" description="Kursiv" />
-              <prop name="underlined" type="boolean" description="Unterstrichen" />
-              <prop name="strikeThrough" type="boolean" description="Durchgestrichen" />
-              <prop name="fontfamily" type="string" description="Schriftfamilie" />
-              <prop name="borderColor" type="string" description="Rahmenfarbe" />
-              <prop name="strokeWidth" type="number" description="Linienstärke des Rahmens" />
-              <prop name="strokeColor" type="string" description="Farbe der Umrandung" />
+              <prop name="text" type="string" description="New text content" />
+              <prop name="left" type="number" description="New X-Position" />
+              <prop name="top" type="number" description="New Y-Position" />
+              <prop name="width" type="number" description="New width of the textbox" />
+              <prop name="rotation" type="number" description="New rotation angle of the textbox" />
+              <prop name="fontsize" type="number" description="New fontsize of the textbox" />
+              <prop name="color" type="string" description="New text color of the textbox" />
+              <prop name="fontAlignment" type="string" description="The new alignment of the text. Can be either 'left', 'center', or 'right'." />
+              <prop name="bold" type="boolean" description="Whether the text should be bold" />
+              <prop name="italic" type="boolean" description="Whether the text should be italic" />
+              <prop name="underlined" type="boolean" description="Whether the text should be underlined" />
+              <prop name="strikeThrough" type="boolean" description="Whether the text should be striked through" />
+              <prop name="fontfamily" type="string" description="The new font family of the text" />
+              <prop name="borderColor" type="string" description="The new stroke color of the text" />
+              <prop name="strokeWidth" type="number" description="The new stroke width of the text" />
+              <prop name="strokeColor" type="string" description="The new color of the stroke of the text" />
           </Tool>
 
           <Tool
               name="add_shape"
-              description="Fügt eine Form (Rechteck, Kreis, Dreieck oder Linie) mit den angegebenen Eigenschaften zur Leinwand hinzu"
+              description="Adds a shape (rectangle, circle, triangle or line) to the canvas with the specified properties"
               onCall={(event) => {
                   const {
                       shape, left, top, width, height,
@@ -790,14 +790,14 @@ export const EnhancedEditorCanvas = ({
                   }
               }}
           >
-              <prop name="shape" type="string" required description="Formtyp: rectangle, circle, triangle oder line" />
-              <prop name="left" type="number" required description="X-Position der Form" />
-              <prop name="top" type="number" required description="Y-Position der Form" />
-              <prop name="width" type="number" required description="Breite der Form" />
-              <prop name="height" type="number" required description="Höhe der Form" />
-              <prop name="fillColor" type="string" required description="Füllfarbe der Form" />
-              <prop name="strokeWidth" type="number" description="Linienstärke der Umrandung" />
-              <prop name="strokeColor" type="string" description="Farbe der Umrandung" />
+              <prop name="shape" type="string" required description="Type of the shape: 'rectangle', 'circle', 'triangle', or 'line'" />
+              <prop name="left" type="number" required description="X-Position of the shape" />
+              <prop name="top" type="number" required description="Y-Position of the shape" />
+              <prop name="width" type="number" required description="Width of the shape" />
+              <prop name="height" type="number" required description="Height of the shape" />
+              <prop name="fillColor" type="string" required description="Fill color of the shape" />
+              <prop name="strokeWidth" type="number" description="Stroke width of the shape" />
+              <prop name="strokeColor" type="string" description="Color of the stroke of the shape" />
           </Tool>
 
             <Tool name="remove_objects" description="Remove objects from the canvas by giving the ids as a list" onCall={(event) => {
@@ -815,7 +815,7 @@ export const EnhancedEditorCanvas = ({
 
           <Tool
             name="edit_shape"
-            description="Bearbeite eine Form (Rechteck, Kreis, Dreieck oder Linie) auf der Leinwand anhand ihrer ID und der gewünschten Eigenschaften"
+            description="Edit a shape on the canvas by its ID and the desired properties"
             onCall={(event) => {
               const {
                 id, left, top, width, height,
@@ -831,15 +831,15 @@ export const EnhancedEditorCanvas = ({
               }
             }}
           >
-            <prop name="id" type="number" required description="ID of the to change shape, the id stays the same after editing, take the same id" />
-            <prop name="left" type="number" description="Neue X-Position" />
-            <prop name="top" type="number" description="Neue Y-Position" />
-            <prop name="width" type="number" description="Neue Breite (nur für Rechteck/Dreieck)" />
-            <prop name="height" type="number" description="Neue Höhe (nur für Rechteck/Dreieck)" />
-            <prop name="fillColor" type="string" description="Neue Füllfarbe" />
-            <prop name="strokeColor" type="string" description="Neue Umrandungsfarbe" />
-            <prop name="strokeWidth" type="number" description="Neue Linienstärke" />
-            <prop name="rotation" type="number" description="Neuer Rotationswinkel in Grad (optional)" />
+            <prop name="id" type="number" required description="ID of the to change shape, the id stays the same after editing, take the same id when editing an object multiple times" />
+            <prop name="left" type="number" description="New X-Position" />
+            <prop name="top" type="number" description="New Y-Position" />
+            <prop name="width" type="number" description="New Width (only for rectangles, circles, and triangles)" />
+            <prop name="height" type="number" description="New Height (only for rectangles, circles, and triangles)" />
+            <prop name="fillColor" type="string" description="New fill color of the shape" />
+            <prop name="strokeColor" type="string" description="New stroke color of the shape" />
+            <prop name="strokeWidth" type="number" description="New stroke width of the shape" />
+            <prop name="rotation" type="number" description="New rotation angle of the shape in degrees" />
           </Tool>
           <Tool
               name="clear_canvas"
