@@ -11,8 +11,7 @@ const Navigation = () => {
 
   const navItems = [
     { path: "/", label: "Home", icon: Home },
-    { path: "/files", label: "Files", icon: Files },
-    { path: "/ide", label: "IDE", icon: ImageIcon },
+    { path: "/canvas", label: "Canvas", icon: ImageIcon },
   ];
 
   return (
@@ -27,7 +26,7 @@ const Navigation = () => {
               Creative Studio
             </h1>
           </div>
-          
+
           <div className="flex items-center space-x-2">
             <div className="flex items-center space-x-1">
               {navItems.map(({ path, label, icon: Icon }) => (
@@ -47,11 +46,6 @@ const Navigation = () => {
                   </Link>
                 </Button>
               ))}
-            </div>
-            <div className="flex items-center space-x-2">
-              <ProjectSelector />
-              <WorkspaceSelector />
-              <ProjectCreator />
             </div>
           </div>
         </div>

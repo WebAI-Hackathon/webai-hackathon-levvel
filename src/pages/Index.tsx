@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Files, ImageIcon, Zap, Upload, Palette } from "lucide-react";
+import {Files, ImageIcon, Zap, Upload, Palette, Sparkles} from "lucide-react";
 
 const Index = () => {
   return (
@@ -16,20 +16,13 @@ const Index = () => {
             Creative Studio
           </h1>
           <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            A powerful file manager and image editor designed for creators. 
-            Organize your assets and bring your creative vision to life.
+            A powerful image editor designed for creators that brings your creative vision to life.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button variant="gradient" size="lg" asChild className="shadow-elegant hover:shadow-glow">
-              <Link to="/files">
+              <Link to="/canvas">
                 <Files className="w-5 h-5 mr-2" />
-                Manage Files
-              </Link>
-            </Button>
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/editor">
-                <ImageIcon className="w-5 h-5 mr-2" />
-                Open Editor
+                Start Creating
               </Link>
             </Button>
           </div>
@@ -40,11 +33,11 @@ const Index = () => {
           <Card className="bg-card/50 backdrop-blur-sm border-border/50 hover:shadow-elegant transition-smooth group">
             <CardContent className="p-6 text-center">
               <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mx-auto mb-4 group-hover:bg-primary/20 transition-smooth">
-                <Files className="w-6 h-6 text-primary" />
+                <Sparkles className="w-6 h-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">File Management</h3>
+              <h3 className="text-lg font-semibold mb-2">VOIX-enhanced</h3>
               <p className="text-muted-foreground">
-                Organize, search, and manage your creative assets with an intuitive interface.
+                Seamlessly integrates with VOIX for enhanced creative capabilities.
               </p>
             </CardContent>
           </Card>
@@ -84,14 +77,9 @@ const Index = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button variant="default" asChild>
-                <Link to="/files">
+                <Link to="/canvas">
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload Files
-                </Link>
-              </Button>
-              <Button variant="ghost" asChild>
-                <Link to="/editor">
-                  Create New Project
+                  Start New Project
                 </Link>
               </Button>
             </div>
