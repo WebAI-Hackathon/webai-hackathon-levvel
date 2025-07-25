@@ -39,7 +39,7 @@ export default function IDE() {
   }
 
   return (
-    <div className=""> {/* Account for fixed navigation */}
+    <div className="pt-16"> {/* Account for fixed navigation */}
       <IDELayout project={currentProject} />
     </div>
   );
