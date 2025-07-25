@@ -78,10 +78,10 @@ export const EnhancedEditorCanvas = ({
                     selectable: true,
                 });
 
+                const scale = Math.min(width / imgElement.naturalWidth, height / imgElement.naturalHeight, 1);
+                fabricImg.scale(scale);
                 // set width and height
                 fabricImg.set({
-                    width: width,
-                    height: height,
                     angle: rotation || 0,
                 });
 
@@ -726,14 +726,14 @@ export const EnhancedEditorCanvas = ({
                       text, left, top, width,
                       rotation, fontsize, color,
                       fontAlignment, bold, italic,
-                      underlined, strikeThrough, fontfamily, borderColor, strokeWidth
+                      underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
                   } = event.detail;
                   if (fabricCanvas) {
                       addTextBox(
                           text, left, top, width,
                           rotation, fontsize, color,
                           fontAlignment, bold, italic,
-                          underlined, strikeThrough, fontfamily, borderColor, strokeWidth
+                          underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
                       );
                   }
               }}
@@ -751,7 +751,7 @@ export const EnhancedEditorCanvas = ({
               <prop name="underlined" type="boolean" description="Unterstrichen" />
               <prop name="strikeThrough" type="boolean" description="Durchgestrichen" />
               <prop name="fontfamily" type="string" description="Schriftfamilie" />
-              <prop name="borderColor" type="string" description="Rahmenfarbe" />
+              <prop name="strokeColor" type="string" description="stoke color" />
               <prop name="strokeWidth" type="number" description="Linienstärke des Rahmens" />
           </Tool>
 
@@ -762,7 +762,7 @@ export const EnhancedEditorCanvas = ({
                         id, text, left, top, width,
                         rotation, fontsize, color,
                         fontAlignment, bold, italic,
-                        underlined, strikeThrough, fontfamily, borderColor, strokeWidth
+                        underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
                     } = event.detail;
                     console.log("Edit id:", id)
                     if (fabricCanvas) {
@@ -770,7 +770,7 @@ export const EnhancedEditorCanvas = ({
                             id, text, left, top, width,
                             rotation, fontsize, color,
                             fontAlignment, bold, italic,
-                            underlined, strikeThrough, fontfamily, borderColor, strokeWidth
+                            underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
                         );
                     }
                 }}
@@ -789,7 +789,6 @@ export const EnhancedEditorCanvas = ({
               <prop name="underlined" type="boolean" description="Unterstrichen" />
               <prop name="strikeThrough" type="boolean" description="Durchgestrichen" />
               <prop name="fontfamily" type="string" description="Schriftfamilie" />
-              <prop name="borderColor" type="string" description="Rahmenfarbe" />
               <prop name="strokeWidth" type="number" description="Linienstärke des Rahmens" />
               <prop name="strokeColor" type="string" description="Farbe der Umrandung" />
           </Tool>
