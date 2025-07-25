@@ -8,7 +8,7 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
   },
-  base: "/webai-hackathon-2025-levvel",
+  base: mode === 'development' ? '/' : "/webai-hackathon-levvel/",
   plugins: [
     react(),
     mode === 'development' &&
