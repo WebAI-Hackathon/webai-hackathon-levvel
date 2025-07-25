@@ -70,11 +70,13 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
 
   const handleGenerateImage = useCallback(async (prompt: string) => {
     setIsGeneratingImage(true);
-    generateImage(prompt).then((imageUrl) => {
+    return generateImage(prompt).then(async (imageUrl) => {
         setIsGeneratingImage(false);
         if (!canvas) return;
 
+
         const imgElement = new Image();
+        let fabricImage: FabricImage | null = null;
         imgElement.src = `data:image/png;base64,${imageUrl}`;
         imgElement.onload = () => {
             const fabricImg = new FabricImage(imgElement, {
@@ -108,12 +110,18 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
                 });
                 canvas.renderAll();
                 toast.success("Image description generated successfully!");
-            })
+            });
 
             setHasImage(true);
             toast.success("Image generated and loaded successfully!");
+            fabricImage = fabricImg;
         };
-    })
+
+        while (!fabricImage) {
+            await new Promise(resolve => setTimeout(resolve, 100)); // Wait for image to load
+        }
+        return fabricImage;
+    });
   }, [canvas, height, width]);
 
   const handleImageUpload = useCallback((file: File) => {
@@ -231,6 +239,7 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
                   setActiveTool={setActiveTool}
                   setFabricObjects={setFabricObjects}
                   fabricObjects={fabricObjects}
+                  generateAiImage={handleGenerateImage}
               />
             </div>
           </div>
