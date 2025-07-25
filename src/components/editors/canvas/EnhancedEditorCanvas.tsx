@@ -930,6 +930,14 @@ export const EnhancedEditorCanvas = ({
                   <prop name="hue" type="number" description="Hue rotation in radiant (-π to π)" />
                   <prop name="filter_preset" type="string" description="Custom filter strings" />
               </Tool>
+
+              <Tool
+                  name="export_image"
+                  description="exports the image as a PNG file"
+                  onCall={() => {
+                      exportImage();
+                  }}
+              />
           </>
       );
   }
@@ -942,17 +950,6 @@ export const EnhancedEditorCanvas = ({
         onDragOver={handleDragOver}
       >
           {isTabActive && buildTools()}
-
-            <Tool
-                name="export_image"
-                description="exports the image as a PNG file"
-                onCall={() => {
-                    exportImage();
-                }}
-            />
-
-
-
         <canvas
           ref={canvasRef}
           className="max-w-full block"
