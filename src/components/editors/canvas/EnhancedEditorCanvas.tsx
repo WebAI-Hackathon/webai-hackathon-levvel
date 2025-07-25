@@ -381,31 +381,31 @@ export const EnhancedEditorCanvas = ({
     if (brightness !== undefined) {
         img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Brightness));
         img.filters.push(new ImageFilters.Brightness({
-            brightness: brightness / 100,
+            brightness: brightness,
         }))
     }
     if (contrast !== undefined) {
         img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Contrast));
         img.filters.push(new ImageFilters.Contrast({
-            contrast: contrast / 100,
+            contrast: contrast,
         }))
     }
     if (saturation !== undefined) {
         img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Saturation));
         img.filters.push(new ImageFilters.Saturation({
-            saturation: saturation / 100,
+            saturation: saturation,
         }))
     }
     if (blur !== undefined) {
         img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Blur));
         img.filters.push(new ImageFilters.Blur({
-            blur: blur / 100,
+            blur: blur,
         }))
     }
     if (hue !== undefined) {
         img.filters = img.filters.filter(f => !(f instanceof ImageFilters.HueRotation));
         img.filters.push(new ImageFilters.HueRotation({
-            rotation: hue / 180 * Math.PI,
+            rotation: hue,
         }))
     }
 
@@ -681,8 +681,14 @@ export const EnhancedEditorCanvas = ({
         } else if (obj.isType('circle')) {
           return `Circle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
         } else if (obj.isType("image")) {
+            const image = obj as FabricImage;
           const imageDescription = obj?.["imageDescription"] || "No description";
-          return `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}), rotation: ${obj.angle}°, description: ${imageDescription}"`;
+          let outStr = `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}), rotation: ${obj.angle}°"`;
+            if (image.filters && image.filters.length > 0) {
+                outStr += `, filters: ${image.filters.map(f => JSON.stringify(f.toJSON())).join(", ")}`;
+            }
+            outStr += `, description: "${imageDescription}"`;
+            return outStr;
         } else if (obj.isType("triangle")) {
           return `Triangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
         } else if (obj.isType("line")) {
@@ -898,13 +904,13 @@ export const EnhancedEditorCanvas = ({
             <prop name="top" type="number" description="New Y position of the image" />
             <prop name="width" type="number" description="New width of the image" />
             <prop name="height" type="number" description="New height of the image" />
-              <prop name="rotation" type="number" description="Rotation angle in degrees (optional)" />
-            <prop name="brightness" type="number" description="Brightness adjustment in percentage (0-100)" />
-            <prop name="contrast" type="number" description="Contrast adjustment in percentage (0-100)" />
-            <prop name="saturation" type="number" description="Saturation adjustment in percentage (0-100)" />
-            <prop name="blur" type="number" description="Blur effect in percentage (0-100)" />
-            <prop name="hue" type="number" description="Hue rotation in degrees (-180 to 180)" />
-            <prop name="filter_preset" type="string" description="Custom filter string (optional)" />
+              <prop name="rotation" type="number" description="Rotation angle in degrees" />
+            <prop name="brightness" type="number" description="Brightness adjustment (0-1)" />
+            <prop name="contrast" type="number" description="Contrast adjustment in percentage (0-1)" />
+            <prop name="saturation" type="number" description="Saturation adjustment in percentage (0-1)" />
+            <prop name="blur" type="number" description="Blur effect in percentage (0-1)" />
+            <prop name="hue" type="number" description="Hue rotation in radiant (-π to π)" />
+            <prop name="filter_preset" type="string" description="Custom filter strings" />
           </Tool>
 
 
