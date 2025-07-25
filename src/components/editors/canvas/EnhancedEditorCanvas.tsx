@@ -88,7 +88,7 @@ export const EnhancedEditorCanvas = ({
     const addTextBox = useCallback((text: string, left: number, top: number, width: number,
                                   rotation?: number, fontsize?: number, color?: string,
                                   fontAlignment?: "left" | "center" | "right", bold?: boolean, italic?: boolean,
-                                  underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, borderColor?: string, strokeWidth?: number) => {
+                                  underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, strokeColor?: string, strokeWidth?: number) => {
       const textbox = new Textbox(text, {
           left: left,
           top: top,
@@ -96,7 +96,7 @@ export const EnhancedEditorCanvas = ({
           fontSize: fontsize || fontSize,
           fontFamily: fontfamily || "Arial",
           width: width,
-          borderColor: borderColor || activeColor,
+          stroke: strokeColor || activeColor,
           textAlign: fontAlignment || "center",
           linethrough: strikeThrough || false,
           underline: underlined || false,
@@ -170,16 +170,12 @@ export const EnhancedEditorCanvas = ({
           textBox.set("fontFamily", fontfamily);
         }
 
-        if (borderColor !== undefined) {
-          textBox.set("stroke", borderColor);
+        if (strokeColor !== undefined) {
+          textBox.set("stroke", strokeColor);
         }
 
         if (strokeWidth !== undefined) {
           textBox.set("strokeWidth", strokeWidth);
-        }
-
-        if (strokeColor !== undefined) {
-          textBox.set("stroke", strokeColor);
         }
 
         // Update the object in the fabricObjects array
@@ -718,14 +714,14 @@ export const EnhancedEditorCanvas = ({
                       text, left, top, width,
                       rotation, fontsize, color,
                       fontAlignment, bold, italic,
-                      underlined, strikeThrough, fontfamily, borderColor, strokeWidth
+                      underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
                   } = event.detail;
                   if (fabricCanvas) {
                       addTextBox(
                           text, left, top, width,
                           rotation, fontsize, color,
                           fontAlignment, bold, italic,
-                          underlined, strikeThrough, fontfamily, borderColor, strokeWidth
+                          underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
                       );
                   }
               }}
@@ -743,7 +739,7 @@ export const EnhancedEditorCanvas = ({
               <prop name="underlined" type="boolean" description="Whether the text should be underlined" />
               <prop name="strikeThrough" type="boolean" description="Whether the text should be striked through" />
               <prop name="fontfamily" type="string" description="The font family of the text" />
-              <prop name="borderColor" type="string" description="The color of the stroke of the text" />
+              <prop name="strokeColor" type="string" description="The stroke color of the text" />
               <prop name="strokeWidth" type="number" description="The width of the stroke of the text" />
           </Tool>
 
@@ -754,7 +750,7 @@ export const EnhancedEditorCanvas = ({
                         id, text, left, top, width,
                         rotation, fontsize, color,
                         fontAlignment, bold, italic,
-                        underlined, strikeThrough, fontfamily, borderColor, strokeWidth
+                        underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
                     } = event.detail;
                     console.log("Edit id:", id)
                     if (fabricCanvas) {
@@ -762,7 +758,7 @@ export const EnhancedEditorCanvas = ({
                             id, text, left, top, width,
                             rotation, fontsize, color,
                             fontAlignment, bold, italic,
-                            underlined, strikeThrough, fontfamily, borderColor, strokeWidth
+                            underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
                         );
                     }
                 }}
@@ -781,7 +777,6 @@ export const EnhancedEditorCanvas = ({
               <prop name="underlined" type="boolean" description="Whether the text should be underlined" />
               <prop name="strikeThrough" type="boolean" description="Whether the text should be striked through" />
               <prop name="fontfamily" type="string" description="The new font family of the text" />
-              <prop name="borderColor" type="string" description="The new stroke color of the text" />
               <prop name="strokeWidth" type="number" description="The new stroke width of the text" />
               <prop name="strokeColor" type="string" description="The new color of the stroke of the text" />
           </Tool>
