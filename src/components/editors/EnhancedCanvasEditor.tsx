@@ -23,12 +23,11 @@ import {
 } from "@/components/ui/resizable";
 
 interface EnhancedCanvasEditorProps {
-  project: EditorProject;
   width?: number;
   height?: number;
 }
 
-export function EnhancedCanvasEditor({ project, width = 800, height = 600 }: EnhancedCanvasEditorProps) {
+export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanvasEditorProps) {
   const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
   const [fabricObjects, setFabricObjects] = useState<FabricObject[]>([]);
   const [activeTool, setActiveTool] = useState("select");
