@@ -4,7 +4,7 @@ import {ImageIcon} from "lucide-react";
 import { toast } from "sonner";
 import { NavigationControls } from "./NavigationControls";
 import {Tool} from "@/components/Tool.tsx";
-import {filterPresets} from "@/components/editors/canvas/EnhancedPropertiesPanel.tsx";
+import {filterPresets, toolFilterPresets} from "@/components/editors/canvas/EnhancedPropertiesPanel.tsx";
 
 interface EnhancedEditorCanvasProps {
   onCanvasReady?: (canvas: FabricCanvas) => void;
@@ -362,6 +362,8 @@ export const EnhancedEditorCanvas = ({
             hue,
           rotation,
             filter_preset,
+            grayscale,
+            sepia,
       }:
       {
           id: number,
@@ -375,6 +377,8 @@ export const EnhancedEditorCanvas = ({
       blur?: number,
       hue?: number,
           rotation?: number,
+          grayscale?: number,
+            sepia?: number,
           filter_preset?: string
 }
   )=> {
@@ -428,6 +432,22 @@ export const EnhancedEditorCanvas = ({
             rotation: hue,
         }))
     }
+      if (sepia !== undefined) {
+          if (sepia <= 0) {
+              img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Sepia));
+          } else {
+              img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Sepia));
+              img.filters.push(new ImageFilters.Sepia());
+          }
+      }
+      if (grayscale !== undefined) {
+          if (grayscale <= 0) {
+              img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Grayscale));
+          } else {
+              img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Grayscale));
+              img.filters.push(new ImageFilters.Grayscale());
+          }
+      }
 
     img.applyFilters();
     fabricCanvas.setActiveObject(img);
@@ -436,13 +456,15 @@ export const EnhancedEditorCanvas = ({
     toast.success("Image updated successfully!");
 
     if (filter_preset !== undefined) {
-        const filterPreset = filterPresets.find(f => f.name === filter_preset).filters;
+        console.log(filter_preset);
+        console.log(toolFilterPresets.map((t) => t.name));
+        const filterPreset = toolFilterPresets.find(f => f.name === filter_preset).filters;
        editImage({
            id,
             ...filterPreset,
        });
     }
-  }, [fabricCanvas, fabricObjects]);
+  }, [fabricCanvas, fabricObjects, setActiveTool]);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -928,12 +950,14 @@ export const EnhancedEditorCanvas = ({
                   <prop name="saturation" type="number" description="Saturation adjustment in percentage (0-1)" />
                   <prop name="blur" type="number" description="Blur effect in percentage (0-1)" />
                   <prop name="hue" type="number" description="Hue rotation in radiant (-π to π)" />
+                  <prop name="grayscale" type="number" description="Grayscale effect (0 or 1)" />
+                  <prop name="sepia" type="number" description="Sepia effect (0 or 1)" />
                   <prop name="filter_preset" type="string" description="Custom filter strings" />
               </Tool>
 
               <Tool
                   name="export_image"
-                  description="exports the image as a PNG file"
+                  description="Exports and downloads the image as a PNG file"
                   onCall={() => {
                       exportImage();
                   }}

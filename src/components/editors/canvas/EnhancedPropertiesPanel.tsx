@@ -66,6 +66,15 @@ export const filterPresets = [
   { name: "Dramatic", filters: { brightness: -10, contrast: 40, saturation: 20, hue: 0, blur: 0, sepia: 0, grayscale: 0 } },
 ];
 
+export const toolFilterPresets = [
+  { name: "Original", filters: { brightness: 0, contrast: 0, saturation: 0, hue: 0, blur: 0, sepia: 0, grayscale: 0 } },
+  { name: "Vintage", filters: { brightness: 0.1, contrast: 0.15, saturation: -0.20, hue: 0.05, blur: 0, sepia: 0.40, grayscale: 0 } },
+  { name: "Black & White", filters: { brightness: 0, contrast: 0.20, saturation: 0, hue: 0, blur: 0, sepia: 0, grayscale: 1 } },
+  { name: "Warm", filters: { brightness: 0.15, contrast: 0.05, saturation: 0.15, hue: 0.10, blur: 0, sepia: 0.20, grayscale: 0 } },
+  { name: "Cool", filters: { brightness: 0.05, contrast: 0.10, saturation: 0.10, hue: -0.15, blur: 0, sepia: 0, grayscale: 0 } },
+  { name: "Dramatic", filters: { brightness: -0.10, contrast: 0.40, saturation: 0.20, hue: 0, blur: 0, sepia: 0, grayscale: 0 } },
+];
+
 export const EnhancedPropertiesPanel = ({ canvas, canvasObjects, activeTool, selectedObject }: EnhancedPropertiesPanelProps) => {
   const [filters, setFilters] = useState<FilterSettings>({
     brightness: 0,
