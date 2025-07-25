@@ -20,6 +20,7 @@ interface EnhancedEditorCanvasProps {
   setActiveTool?: (tool: string) => void;
   fabricObjects?: FabricObject[];
   setFabricObjects?: (objects: FabricObject[]) => void;
+  generateAiImage?: (prompt: string) => Promise<FabricImage>;
 }
 
 export const EnhancedEditorCanvas = ({
@@ -34,7 +35,8 @@ export const EnhancedEditorCanvas = ({
   height = 600,
   setActiveTool,
   fabricObjects = [],
-  setFabricObjects = () => { /* no-op */ }
+  setFabricObjects = () => { /* no-op */ },
+  generateAiImage = () => Promise.resolve(null),
 }: EnhancedEditorCanvasProps) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,42 +67,20 @@ export const EnhancedEditorCanvas = ({
         }
     }, [fabricCanvas, fabricObjects]);
 
-    const generateAiImage = useCallback(async (prompt: string,
-                                                   top: number, left: number, width: number, height: number, rotation?: number) => {
-        generateImage(prompt).then((imageUrl) => {
+    const handleGenerateAiImage = useCallback((prompt: string, top: number, left: number, width: number, height: number, rotation?: number) => {
+        generateAiImage(prompt).then((fabricImg) => {
+            if (width !== undefined) fabricImg.scaleToWidth(width)
+            if (height !== undefined) fabricImg.scaleToHeight(height)
 
-            const imgElement = new Image();
-            imgElement.src = `data:image/png;base64,${imageUrl}`;
-            imgElement.onload = () => {
-                const fabricImg = new FabricImage(imgElement, {
-                    left: left,
-                    top: top,
-                    selectable: true,
-                });
-
-                const scale = Math.min(width / imgElement.naturalWidth, height / imgElement.naturalHeight, 1);
-                fabricImg.scale(scale);
-                // set width and height
-                fabricImg.set({
-                    angle: rotation || 0,
-                });
-
-                fabricCanvas.add(fabricImg);
-                fabricCanvas.setActiveObject(fabricImg);
-                fabricCanvas.renderAll();
-
-                generateImageDescription(imgElement.src).then(description => {
-                    fabricImg.set({
-                        imageDescription: description,
-                    });
-                    fabricCanvas.renderAll();
-                    toast.success("Image description generated successfully!");
-                })
-
-                toast.success("Image generated and loaded successfully!");
-            };
+            fabricImg.set({
+                left: left,
+                top: top,
+                angle: rotation || 0,
+            });
+            fabricImg.setCoords();
+            fabricCanvas.renderAll();
         })
-    }, [fabricCanvas, height, width]);
+    }, [fabricCanvas, generateAiImage]);
 
 
     const addTextBox = useCallback((text: string, left: number, top: number, width: number,
@@ -132,7 +112,7 @@ export const EnhancedEditorCanvas = ({
   const editTextBox = useCallback((index: number, text?: string, left?: number, top?: number, width?: number,
                                    rotation?: number, fontsize?: number, color?: string,
                                    fontAlignment?: "left" | "center" | "right", bold?: boolean, italic?: boolean,
-                                   underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, strokeColor?: string, strokeWidth?: number) => {
+                                   underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, borderColor?: string, strokeWidth?: number, strokeColor?: string) => {
     if (fabricCanvas && fabricObjects[index - 1] && fabricObjects[index - 1].isType("textbox")) {
       const textBox = fabricObjects[index - 1];
 
@@ -880,7 +860,7 @@ export const EnhancedEditorCanvas = ({
               description="Generates an AI image based on a prompt and adds it to the canvas"
                 onCall={(event) => {
                     const { prompt, top, left, width, height, rotation } = event.detail;
-                    generateAiImage(prompt, top, left, width, height, rotation);
+                    handleGenerateAiImage(prompt, top, left, width, height, rotation);
                 }}
             >
                 <prop name="prompt" type="string" required description="AI image generation prompt" />

@@ -37,7 +37,6 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [selectedObject, setSelectedObject] = useState<any>(null);
   const [hasImage, setHasImage] = useState(false);
-  const [zoom, setZoom] = useState(100);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
 
   useEffect(() => {
@@ -71,11 +70,13 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
 
   const handleGenerateImage = useCallback(async (prompt: string) => {
     setIsGeneratingImage(true);
-    generateImage(prompt).then((imageUrl) => {
+    return generateImage(prompt).then(async (imageUrl) => {
         setIsGeneratingImage(false);
         if (!canvas) return;
 
+
         const imgElement = new Image();
+        let fabricImage: FabricImage | null = null;
         imgElement.src = `data:image/png;base64,${imageUrl}`;
         imgElement.onload = () => {
             const fabricImg = new FabricImage(imgElement, {
@@ -109,12 +110,18 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
                 });
                 canvas.renderAll();
                 toast.success("Image description generated successfully!");
-            })
+            });
 
             setHasImage(true);
             toast.success("Image generated and loaded successfully!");
+            fabricImage = fabricImg;
         };
-    })
+
+        while (!fabricImage) {
+            await new Promise(resolve => setTimeout(resolve, 100)); // Wait for image to load
+        }
+        return fabricImage;
+    });
   }, [canvas, height, width]);
 
   const handleImageUpload = useCallback((file: File) => {
@@ -171,35 +178,6 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
     setHasImage(true);
   }, []);
 
-  const handleZoomIn = () => {
-    if (!canvas) return;
-    const newZoom = Math.min(zoom + 25, 500);
-    setZoom(newZoom);
-    const zoomPoint = new Point(canvas.width! / 2, canvas.height! / 2);
-    canvas.zoomToPoint(zoomPoint, newZoom / 100);
-    canvas.renderAll();
-    toast.success(`Zoomed to ${newZoom}%`);
-  };
-
-  const handleZoomOut = () => {
-    if (!canvas) return;
-    const newZoom = Math.max(zoom - 25, 25);
-    setZoom(newZoom);
-    const zoomPoint = new Point(canvas.width! / 2, canvas.height! / 2);
-    canvas.zoomToPoint(zoomPoint, newZoom / 100);
-    canvas.renderAll();
-    toast.success(`Zoomed to ${newZoom}%`);
-  };
-
-  const handleZoomSlider = (value: number[]) => {
-    if (!canvas) return;
-    const newZoom = value[0];
-    setZoom(newZoom);
-    const zoomPoint = new Point(canvas.width! / 2, canvas.height! / 2);
-    canvas.zoomToPoint(zoomPoint, newZoom / 100);
-    canvas.renderAll();
-  };
-
   return (
     <ResizablePanelGroup direction="horizontal" className="h-full flex bg-background">
       {/* Left Toolbar */}
@@ -229,7 +207,7 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
           {/* Canvas Header */}
           <div className="h-12 border-b border-border bg-card/50 backdrop-blur-sm px-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 h-8">
                 <Badge variant="secondary" className="gap-1">
                   <Sparkles className="h-3 w-3" />
                   Enhanced Canvas
@@ -243,41 +221,6 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
               </div>
             </div>
 
-            {/* Zoom Controls */}
-            <div className="flex items-center gap-3">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleZoomOut}
-                disabled={zoom <= 25}
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-
-              <div className="w-24">
-                <Slider
-                  value={[zoom]}
-                  onValueChange={handleZoomSlider}
-                  min={25}
-                  max={500}
-                  step={25}
-                  className="w-full"
-                />
-              </div>
-
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleZoomIn}
-                disabled={zoom >= 500}
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-
-              <span className="text-sm text-muted-foreground min-w-[50px] text-center">
-                {zoom}%
-              </span>
-            </div>
           </div>
 
           {/* Canvas Content */}
@@ -296,6 +239,7 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
                   setActiveTool={setActiveTool}
                   setFabricObjects={setFabricObjects}
                   fabricObjects={fabricObjects}
+                  generateAiImage={handleGenerateImage}
               />
             </div>
           </div>
