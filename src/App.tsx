@@ -15,7 +15,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename="/webai-hackathon-levvel">
         <Navigation />
         <Routes>
           <Route path="/" element={<Index />} />
