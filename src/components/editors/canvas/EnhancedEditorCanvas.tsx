@@ -40,7 +40,29 @@ export const EnhancedEditorCanvas = ({
 
   const [isDrawing, setIsDrawing] = useState(false);
 
-  const addTextBox = useCallback((text: string, left: number, top: number, width: number,
+  const clearCanvas = useCallback(() => {
+    if (fabricCanvas) {
+      fabricCanvas.clear();
+      setFabricObjects([]);
+      fabricCanvas.renderAll();
+      toast.success("Canvas cleared successfully!");
+    } else {
+      toast.error("Canvas not initialized.");
+    }
+  }, [fabricCanvas, setFabricObjects]);
+
+    const moveObjectToLayer = useCallback((index: number, layer: number) => {
+        if (fabricCanvas && fabricObjects[index - 1]) {
+            const object = fabricObjects[index - 1];
+            fabricCanvas.moveTo(object, layer);
+            fabricCanvas.renderAll();
+            toast.success(`Objekt wurde auf Ebene ${layer} verschoben`);
+        } else {
+            toast.error("Objekt nicht gefunden.");
+        }
+    }, [fabricCanvas, fabricObjects]);
+
+    const addTextBox = useCallback((text: string, left: number, top: number, width: number,
                                   rotation?: number, fontsize?: number, color?: string,
                                   fontAlignment?: "left" | "center" | "right", bold?: boolean, italic?: boolean,
                                   underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, borderColor?: string, strokeWidth?: number) => {
@@ -475,6 +497,7 @@ export const EnhancedEditorCanvas = ({
     };
   }, [fabricCanvas, handleCanvasClick]);
 
+
   const loadImageFromFile = (file: File) => {
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -709,6 +732,27 @@ export const EnhancedEditorCanvas = ({
             <prop name="strokeWidth" type="number" description="Neue Linienstärke" />
             <prop name="rotation" type="number" description="Neuer Rotationswinkel in Grad (optional)" />
           </Tool>
+          <Tool
+              name="clear_canvas"
+              description="Clears canvas and deletes all objects"
+              onCall={() => {
+                  clearCanvas();
+              }}
+          />
+
+          <Tool
+              name="move_object_to_layer"
+                description="Moves an object to a specific layer by its index"
+                onCall={(event) => {
+                    const { index, layer } = event.detail;
+                    moveObjectToLayer(index, layer);
+                }}
+            >
+                <prop name="id" type="number" required description="ID of the object to move" />
+                <prop name="layer" type="number" required description="Layer number to move the object to" />
+            </Tool>
+
+
         <canvas
           ref={canvasRef}
           className="max-w-full block"
