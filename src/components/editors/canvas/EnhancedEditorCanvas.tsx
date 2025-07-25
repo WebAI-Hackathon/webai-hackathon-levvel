@@ -4,6 +4,7 @@ import {ImageIcon} from "lucide-react";
 import { toast } from "sonner";
 import { NavigationControls } from "./NavigationControls";
 import {Tool} from "@/components/Tool.tsx";
+import {generateImage, generateImageDescription} from "@/utils/aiHelpers.ts";
 
 interface EnhancedEditorCanvasProps {
   onCanvasReady?: (canvas: FabricCanvas) => void;
@@ -54,13 +55,52 @@ export const EnhancedEditorCanvas = ({
     const moveObjectToLayer = useCallback((index: number, layer: number) => {
         if (fabricCanvas && fabricObjects[index - 1]) {
             const object = fabricObjects[index - 1];
-            fabricCanvas.moveTo(object, layer);
+            fabricCanvas.moveObjectTo(object, layer)
+
             fabricCanvas.renderAll();
             toast.success(`Objekt wurde auf Ebene ${layer} verschoben`);
         } else {
             toast.error("Objekt nicht gefunden.");
         }
     }, [fabricCanvas, fabricObjects]);
+
+    const generateAiImage = useCallback(async (prompt: string,
+                                                   top: number, left: number, width: number, height: number, rotation?: number) => {
+        generateImage(prompt).then((imageUrl) => {
+
+            const imgElement = new Image();
+            imgElement.src = `data:image/png;base64,${imageUrl}`;
+            imgElement.onload = () => {
+                const fabricImg = new FabricImage(imgElement, {
+                    left: left,
+                    top: top,
+                    selectable: true,
+                });
+
+                // set width and height
+                fabricImg.set({
+                    width: width,
+                    height: height,
+                    angle: rotation || 0,
+                });
+
+                fabricCanvas.add(fabricImg);
+                fabricCanvas.setActiveObject(fabricImg);
+                fabricCanvas.renderAll();
+
+                generateImageDescription(imgElement.src).then(description => {
+                    fabricImg.set({
+                        imageDescription: description,
+                    });
+                    fabricCanvas.renderAll();
+                    toast.success("Image description generated successfully!");
+                })
+
+                toast.success("Image generated and loaded successfully!");
+            };
+        })
+    }, [fabricCanvas, height, width]);
+
 
     const addTextBox = useCallback((text: string, left: number, top: number, width: number,
                                   rotation?: number, fontsize?: number, color?: string,
@@ -744,14 +784,28 @@ export const EnhancedEditorCanvas = ({
               name="move_object_to_layer"
                 description="Moves an object to a specific layer by its index"
                 onCall={(event) => {
-                    const { index, layer } = event.detail;
-                    moveObjectToLayer(index, layer);
+                    const { id, layer } = event.detail;
+                    moveObjectToLayer(id, layer);
                 }}
             >
                 <prop name="id" type="number" required description="ID of the object to move" />
                 <prop name="layer" type="number" required description="Layer number to move the object to" />
             </Tool>
-
+          <Tool
+              name="generate_ai_image"
+              description="Generates an AI image based on a prompt and adds it to the canvas"
+                onCall={(event) => {
+                    const { prompt, top, left, width, height, rotation } = event.detail;
+                    generateAiImage(prompt, top, left, width, height, rotation);
+                }}
+            >
+                <prop name="prompt" type="string" required description="AI image generation prompt" />
+                <prop name="top" type="number" required description="Top position of the image on the canvas" />
+                <prop name="left" type="number" required description="Left position of the image on the canvas" />
+                <prop name="width" type="number" required description="Width of the image on the canvas" />
+                <prop name="height" type="number" required description="Height of the image on the canvas" />
+                <prop name="rotation" type="number" description="Rotation angle in degrees (optional)" />
+            </Tool>
 
         <canvas
           ref={canvasRef}
