@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import {Canvas as FabricCanvas, Image as FabricImage, Circle, Rect, Textbox, FabricObject, Triangle, Line} from "fabric";
+import {Canvas as FabricCanvas, Image as FabricImage, Circle, Rect, Textbox, FabricObject, Triangle, Line, filters as ImageFilters,} from "fabric";
 import {ImageIcon} from "lucide-react";
 import { toast } from "sonner";
 import { NavigationControls } from "./NavigationControls";
 import {Tool} from "@/components/Tool.tsx";
+import {filterPresets} from "@/components/editors/canvas/EnhancedPropertiesPanel.tsx";
 
 interface EnhancedEditorCanvasProps {
   onCanvasReady?: (canvas: FabricCanvas) => void;
@@ -303,6 +304,94 @@ export const EnhancedEditorCanvas = ({
     fabricCanvas.renderAll();
 
     toast.success("Shape updated successfully!");
+  }, [fabricCanvas, fabricObjects]);
+
+  const editImage = useCallback((
+      {
+          id,
+            left,
+            top,
+            width,
+            height,
+            brightness,
+            contrast,
+            saturation,
+            blur,
+            hue,
+          rotation,
+            filter_preset,
+      }:
+      {
+          id: number,
+          left?: number,
+      top?: number,
+      width?: number,
+      height?: number,
+      brightness?: number,
+      contrast?: number,
+      saturation?: number,
+      blur?: number,
+      hue?: number,
+          rotation?: number,
+          filter_preset?: string
+}
+  )=> {
+    if (!fabricCanvas || !fabricObjects[id - 1] || !fabricObjects[id - 1].isType("image")) {
+      toast.error("Image not found.");
+      return;
+    }
+
+    const img = fabricObjects[id - 1] as FabricImage;
+
+    if (left !== undefined) img.set("left", left);
+    if (top !== undefined) img.set("top", top);
+    if (width !== undefined) img.set("width", width);
+    if (height !== undefined) img.set("height", height);
+    if (rotation !== undefined) img.set("angle", rotation);
+    img.setCoords();
+
+    if (brightness !== undefined) {
+        img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Brightness));
+        img.filters.push(new ImageFilters.Brightness({
+            brightness: brightness / 100,
+        }))
+    }
+    if (contrast !== undefined) {
+        img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Contrast));
+        img.filters.push(new ImageFilters.Contrast({
+            contrast: contrast / 100,
+        }))
+    }
+    if (saturation !== undefined) {
+        img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Saturation));
+        img.filters.push(new ImageFilters.Saturation({
+            saturation: saturation / 100,
+        }))
+    }
+    if (blur !== undefined) {
+        img.filters = img.filters.filter(f => !(f instanceof ImageFilters.Blur));
+        img.filters.push(new ImageFilters.Blur({
+            blur: blur / 100,
+        }))
+    }
+    if (hue !== undefined) {
+        img.filters = img.filters.filter(f => !(f instanceof ImageFilters.HueRotation));
+        img.filters.push(new ImageFilters.HueRotation({
+            rotation: hue / 180 * Math.PI,
+        }))
+    }
+
+    img.applyFilters();
+    fabricCanvas.renderAll();
+    toast.success("Image updated successfully!");
+
+    if (filter_preset !== undefined) {
+        const filterPreset = filterPresets.find(f => f.name === filter_preset).filters;
+       editImage({
+           id,
+            ...filterPreset,
+       });
+    }
   }, [fabricCanvas, fabricObjects]);
 
   useEffect(() => {
@@ -751,6 +840,30 @@ export const EnhancedEditorCanvas = ({
                 <prop name="id" type="number" required description="ID of the object to move" />
                 <prop name="layer" type="number" required description="Layer number to move the object to" />
             </Tool>
+
+          <context name="available_filter_presets">
+              {filterPresets.map((preset) => preset.name).join(", ")}
+          </context>
+
+          <Tool name="edit_image" description={"Edit an image on the canvas by its ID and the desired properties"} onCall={(event) => {
+                console.log("Edit image id:", event.detail.id)
+                if (fabricCanvas) {
+                    editImage(event.detail);
+                }
+          }}>
+            <prop name="id" type="number" required description="ID of the image to edit, the id stays the same after editing, take the same id" />
+            <prop name="left" type="number" description="New X position of the image" />
+            <prop name="top" type="number" description="New Y position of the image" />
+            <prop name="width" type="number" description="New width of the image" />
+            <prop name="height" type="number" description="New height of the image" />
+              <prop name="rotation" type="number" description="Rotation angle in degrees (optional)" />
+            <prop name="brightness" type="number" description="Brightness adjustment in percentage (0-100)" />
+            <prop name="contrast" type="number" description="Contrast adjustment in percentage (0-100)" />
+            <prop name="saturation" type="number" description="Saturation adjustment in percentage (0-100)" />
+            <prop name="blur" type="number" description="Blur effect in percentage (0-100)" />
+            <prop name="hue" type="number" description="Hue rotation in degrees (-180 to 180)" />
+            <prop name="filter_preset" type="string" description="Custom filter string (optional)" />
+          </Tool>
 
 
         <canvas

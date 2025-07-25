@@ -57,7 +57,7 @@ interface FilterSettings {
   grayscale: number;
 }
 
-const filterPresets = [
+export const filterPresets = [
   { name: "Original", filters: { brightness: 0, contrast: 0, saturation: 0, hue: 0, blur: 0, sepia: 0, grayscale: 0 } },
   { name: "Vintage", filters: { brightness: 10, contrast: 15, saturation: -20, hue: 5, blur: 0, sepia: 40, grayscale: 0 } },
   { name: "Black & White", filters: { brightness: 0, contrast: 20, saturation: 0, hue: 0, blur: 0, sepia: 0, grayscale: 100 } },
