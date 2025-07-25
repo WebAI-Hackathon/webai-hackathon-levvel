@@ -83,6 +83,23 @@ export const EnhancedEditorCanvas = ({
         })
     }, [fabricCanvas, generateAiImage]);
 
+    const exportImage = () => {
+        if (fabricCanvas) {
+            const dataURL = fabricCanvas.toDataURL({
+                format: 'png',
+                quality: 1.0,
+                multiplier: 2
+            });
+
+            const link = document.createElement('a');
+            link.href = dataURL;
+            link.download = 'canvas-artwork.png';
+            link.click();
+
+            toast.success("Image exported successfully!");
+        }
+    };
+
 
     const addTextBox = useCallback((text: string, left: number, top: number, width: number,
                                   rotation?: number, fontsize?: number, color?: string,
@@ -252,7 +269,6 @@ export const EnhancedEditorCanvas = ({
 
         }
     }, [activeColor, fabricCanvas]);
-
 
 
   const removeObjects = useCallback((ids: number[]) => {
@@ -926,6 +942,15 @@ export const EnhancedEditorCanvas = ({
         onDragOver={handleDragOver}
       >
           {isTabActive && buildTools()}
+
+            <Tool
+                name="export_image"
+                description="exports the image as a PNG file"
+                onCall={() => {
+                    exportImage();
+                }}
+            />
+
 
 
         <canvas
