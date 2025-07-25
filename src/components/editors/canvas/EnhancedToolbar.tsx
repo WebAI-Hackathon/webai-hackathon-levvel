@@ -265,26 +265,26 @@ export const EnhancedToolbar = ({
 
       {/* History Controls */}
       <div className="px-4 space-y-2">
-        <div className="text-xs text-muted-foreground font-medium">History</div>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleUndo}
-            disabled={historyIndex <= 0}
-          >
-            <Undo className="h-4 w-4" />
-          </Button>
+        {/*<div className="text-xs text-muted-foreground font-medium">History</div>*/}
+        {/*<div className="grid grid-cols-2 gap-2">*/}
+        {/*  <Button*/}
+        {/*    variant="outline"*/}
+        {/*    size="sm"*/}
+        {/*    onClick={handleUndo}*/}
+        {/*    disabled={historyIndex <= 0}*/}
+        {/*  >*/}
+        {/*    <Undo className="h-4 w-4" />*/}
+        {/*  </Button>*/}
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRedo}
-            disabled={historyIndex >= history.length - 1}
-          >
-            <Redo className="h-4 w-4" />
-          </Button>
-        </div>
+        {/*  <Button*/}
+        {/*    variant="outline"*/}
+        {/*    size="sm"*/}
+        {/*    onClick={handleRedo}*/}
+        {/*    disabled={historyIndex >= history.length - 1}*/}
+        {/*  >*/}
+        {/*    <Redo className="h-4 w-4" />*/}
+        {/*  </Button>*/}
+        {/*</div>*/}
 
         <Button
           variant="outline"

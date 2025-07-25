@@ -213,10 +213,10 @@ export function EditorWorkspace({ project, selectedFile }: EditorWorkspaceProps)
     }
 
     return (
-      <>
-        {buildTools()}
+      <div key={`editor-${tab.id}`}>
+        {activeTabId === tab.id && buildTools()}
         <EnhancedCanvasEditor width={800} height={800} />
-      </>
+      </div>
     );
     } catch (error) {
       console.error('Error rendering editor:', error);
@@ -317,17 +317,6 @@ export function EditorWorkspace({ project, selectedFile }: EditorWorkspaceProps)
                   variant="ghost"
                   size="sm"
                   className="h-4 w-4 p-0 opacity-0 group-hover:opacity-100 hover:bg-primary hover:text-primary-foreground"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const newTab: EditorTab = {
-                      id: `new-${Date.now()}`,
-                      title: 'New Canvas',
-                      type: 'canvas',
-                      isDirty: false,
-                    };
-                    setTabs(prev => [...prev, newTab]);
-                    setActiveTabId(newTab.id);
-                  }}
               >
                 <Plus className="h-3 w-3" />
               </Button>

@@ -25,9 +25,10 @@ import {
 interface EnhancedCanvasEditorProps {
   width?: number;
   height?: number;
+  isTabActive?: boolean;
 }
 
-export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanvasEditorProps) {
+export function EnhancedCanvasEditor({ width = 800, height = 600, isTabActive = true }: EnhancedCanvasEditorProps) {
   const [canvas, setCanvas] = useState<FabricCanvas | null>(null);
   const [fabricObjects, setFabricObjects] = useState<FabricObject[]>([]);
   const [activeTool, setActiveTool] = useState("select");
@@ -80,9 +81,9 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
         imgElement.src = `data:image/png;base64,${imageUrl}`;
         imgElement.onload = () => {
             const fabricImg = new FabricImage(imgElement, {
-            left: 0,
-            top: 0,
-            selectable: true,
+                left: 0,
+                top: 0,
+                selectable: true,
             });
 
             // Scale image to fit canvas while maintaining aspect ratio
@@ -240,6 +241,7 @@ export function EnhancedCanvasEditor({ width = 800, height = 600 }: EnhancedCanv
                   setFabricObjects={setFabricObjects}
                   fabricObjects={fabricObjects}
                   generateAiImage={handleGenerateImage}
+                  isTabActive={isTabActive}
               />
             </div>
           </div>

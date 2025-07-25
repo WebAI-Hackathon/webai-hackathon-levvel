@@ -5,7 +5,6 @@ import { toast } from "sonner";
 import { NavigationControls } from "./NavigationControls";
 import {Tool} from "@/components/Tool.tsx";
 import {filterPresets} from "@/components/editors/canvas/EnhancedPropertiesPanel.tsx";
-import {generateImage, generateImageDescription} from "@/utils/aiHelpers.ts";
 
 interface EnhancedEditorCanvasProps {
   onCanvasReady?: (canvas: FabricCanvas) => void;
@@ -21,6 +20,7 @@ interface EnhancedEditorCanvasProps {
   fabricObjects?: FabricObject[];
   setFabricObjects?: (objects: FabricObject[]) => void;
   generateAiImage?: (prompt: string) => Promise<FabricImage>;
+  isTabActive?: boolean;
 }
 
 export const EnhancedEditorCanvas = ({
@@ -37,12 +37,11 @@ export const EnhancedEditorCanvas = ({
   fabricObjects = [],
   setFabricObjects = () => { /* no-op */ },
   generateAiImage = () => Promise.resolve(null),
+  isTabActive = true,
 }: EnhancedEditorCanvasProps) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
-
-  const [isDrawing, setIsDrawing] = useState(false);
 
   const clearCanvas = useCallback(() => {
     if (fabricCanvas) {
@@ -107,6 +106,8 @@ export const EnhancedEditorCanvas = ({
           angle: rotation || 0,
       });
       fabricCanvas.add(textbox);
+        fabricCanvas.setActiveObject(textbox);
+        setActiveTool?.("select");
       fabricCanvas.renderAll();
 
   }, [activeColor, fontSize, fabricCanvas]);
@@ -179,8 +180,9 @@ export const EnhancedEditorCanvas = ({
         }
 
         // Update the object in the fabricObjects array
-        fabricObjects[index - 1] = textBox;
-        fabricObjects[index - 1].setCoords();
+        textBox.setCoords();
+        fabricCanvas.setActiveObject(textBox);
+        setActiveTool?.("select");
       fabricCanvas.renderAll();
       toast.success("Text updated successfully!");
     } else {
@@ -323,6 +325,8 @@ export const EnhancedEditorCanvas = ({
     }
 
     obj.setCoords();
+      fabricCanvas.setActiveObject(obj);
+      setActiveTool?.("select");
     fabricCanvas.renderAll();
 
     toast.success("Shape updated successfully!");
@@ -410,6 +414,8 @@ export const EnhancedEditorCanvas = ({
     }
 
     img.applyFilters();
+    fabricCanvas.setActiveObject(img);
+    setActiveTool?.("select");
     fabricCanvas.renderAll();
     toast.success("Image updated successfully!");
 
@@ -683,11 +689,11 @@ export const EnhancedEditorCanvas = ({
         } else if (obj.isType("image")) {
             const image = obj as FabricImage;
           const imageDescription = obj?.["imageDescription"] || "No description";
-          let outStr = `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}), rotation: ${obj.angle}°". ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
+          let outStr = `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}), rotation: ${obj.angle}°". ${obj === fabricCanvas?.getActiveObject() ? "(The user has selected this object)": ""}`;
             if (image.filters && image.filters.length > 0) {
-                outStr += `, filters: ${image.filters.map(f => JSON.stringify(f.toJSON())).join(", ")}`;
+                outStr += `The image has the following filters: ${image.filters.map(f => JSON.stringify(f.toJSON())).join(", ")}. `;
             }
-            outStr += `, description: "${imageDescription}"`;
+            outStr += `The image description: "${imageDescription}"`;
             return outStr;
         } else if (obj.isType("triangle")) {
           return `Triangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°. ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
@@ -697,7 +703,220 @@ export const EnhancedEditorCanvas = ({
         } else {
           return `Object id = ${index + 1} of type ${obj.type}. ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
         }
-      }).join("\n");
+      }).map((text) => `- ${text}`).join("\n\n");
+
+  const buildTools = () => {
+      return (
+          <>
+              <context name="Canvas Size">
+                  {width} x {height}
+              </context>
+              <context name="Canvas Objects">
+                  {canvasObjectsString}
+              </context>
+              <Tool
+                  name="add_text"
+                  description="Add a text box to the canvas with the specified properties"
+                  onCall={(event) => {
+                      const {
+                          text, left, top, width,
+                          rotation, fontsize, color,
+                          fontAlignment, bold, italic,
+                          underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
+                      } = event.detail;
+                      if (fabricCanvas) {
+                          addTextBox(
+                              text, left, top, width,
+                              rotation, fontsize, color,
+                              fontAlignment, bold, italic,
+                              underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
+                          );
+                      }
+                  }}
+              >
+                  <prop name="text" type="string" required description="The text that should be added" />
+                  <prop name="left" type="number" required description="X-Position of the new text" />
+                  <prop name="top" type="number" required description="Y-Position of the new text" />
+                  <prop name="width" type="number" required description="Width of the textbox" />
+                  <prop name="rotation" type="number" description="Rotation angle of the textbox in degrees" />
+                  <prop name="fontsize" type="number" description="Font size of the textbox" />
+                  <prop name="color" type="string" description="Text color of the new text in the format #rrggbb" />
+                  <prop name="fontAlignment" type="string" description="The text alignment of the new text. Can be one of 'left', 'center', or 'right'" />
+                  <prop name="bold" type="boolean" description="Whether the text should be bold" />
+                  <prop name="italic" type="boolean" description="Whether the text should be italic" />
+                  <prop name="underlined" type="boolean" description="Whether the text should be underlined" />
+                  <prop name="strikeThrough" type="boolean" description="Whether the text should be striked through" />
+                  <prop name="fontfamily" type="string" description="The font family of the text" />
+                  <prop name="strokeColor" type="string" description="The stroke color of the text" />
+                  <prop name="strokeWidth" type="number" description="The width of the stroke of the text" />
+              </Tool>
+
+              <Tool name="edit_text"
+                    description="Edit text on the canvas identified with the id"
+                    onCall={(event) => {
+                        const {
+                            id, text, left, top, width,
+                            rotation, fontsize, color,
+                            fontAlignment, bold, italic,
+                            underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
+                        } = event.detail;
+                        console.log("Edit id:", id)
+                        if (fabricCanvas) {
+                            editTextBox(
+                                id, text, left, top, width,
+                                rotation, fontsize, color,
+                                fontAlignment, bold, italic,
+                                underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
+                            );
+                        }
+                    }}
+              >
+                  <prop name="id" type="number" required description="ID of the to changing text box, the id stays the same after editing, take the same id" />
+                  <prop name="text" type="string" description="New text content" />
+                  <prop name="left" type="number" description="New X-Position" />
+                  <prop name="top" type="number" description="New Y-Position" />
+                  <prop name="width" type="number" description="New width of the textbox" />
+                  <prop name="rotation" type="number" description="New rotation angle of the textbox" />
+                  <prop name="fontsize" type="number" description="New fontsize of the textbox" />
+                  <prop name="color" type="string" description="New text color of the textbox" />
+                  <prop name="fontAlignment" type="string" description="The new alignment of the text. Can be either 'left', 'center', or 'right'." />
+                  <prop name="bold" type="boolean" description="Whether the text should be bold" />
+                  <prop name="italic" type="boolean" description="Whether the text should be italic" />
+                  <prop name="underlined" type="boolean" description="Whether the text should be underlined" />
+                  <prop name="strikeThrough" type="boolean" description="Whether the text should be striked through" />
+                  <prop name="fontfamily" type="string" description="The new font family of the text" />
+                  <prop name="strokeWidth" type="number" description="The new stroke width of the text" />
+                  <prop name="strokeColor" type="string" description="The new color of the stroke of the text" />
+              </Tool>
+
+              <Tool
+                  name="add_shape"
+                  description="Adds a shape (rectangle, circle, triangle or line) to the canvas with the specified properties"
+                  onCall={(event) => {
+                      const {
+                          shape, left, top, width, height,
+                          fillColor, strokeWidth, strokeColor
+                      } = event.detail;
+                      if (fabricCanvas) {
+                          addShape(
+                              shape, left, top, width, height,
+                              fillColor, strokeWidth, strokeColor
+                          );
+                      }
+                  }}
+              >
+                  <prop name="shape" type="string" required description="Type of the shape: 'rectangle', 'circle', 'triangle', or 'line'" />
+                  <prop name="left" type="number" required description="X-Position of the shape" />
+                  <prop name="top" type="number" required description="Y-Position of the shape" />
+                  <prop name="width" type="number" required description="Width of the shape" />
+                  <prop name="height" type="number" required description="Height of the shape" />
+                  <prop name="fillColor" type="string" required description="Fill color of the shape" />
+                  <prop name="strokeWidth" type="number" description="Stroke width of the shape" />
+                  <prop name="strokeColor" type="string" description="Color of the stroke of the shape" />
+              </Tool>
+
+              <Tool name="remove_objects" description="Remove objects from the canvas by giving the ids as a list" onCall={(event) => {
+                  const { ids } = event.detail;
+                  if (fabricCanvas) {
+                      removeObjects(ids);
+                  }
+              }}>
+                  <array name="ids" required>
+                      <dict>
+                          <prop name="id" type="number" required description="ID of the object to remove" />
+                      </dict>
+                  </array>
+              </Tool>
+
+              <Tool
+                  name="edit_shape"
+                  description="Edit a shape on the canvas by its ID and the desired properties"
+                  onCall={(event) => {
+                      const {
+                          id, left, top, width, height,
+                          fillColor, strokeColor, strokeWidth, rotation
+                      } = event.detail;
+
+                      console.log("Edit id:", id)
+                      if (fabricCanvas) {
+                          editShape(
+                              id, left, top, width, height,
+                              fillColor, strokeColor, strokeWidth, rotation,
+                          );
+                      }
+                  }}
+              >
+                  <prop name="id" type="number" required description="ID of the to change shape, the id stays the same after editing, take the same id when editing an object multiple times" />
+                  <prop name="left" type="number" description="New X-Position" />
+                  <prop name="top" type="number" description="New Y-Position" />
+                  <prop name="width" type="number" description="New Width (only for rectangles, circles, and triangles)" />
+                  <prop name="height" type="number" description="New Height (only for rectangles, circles, and triangles)" />
+                  <prop name="fillColor" type="string" description="New fill color of the shape" />
+                  <prop name="strokeColor" type="string" description="New stroke color of the shape" />
+                  <prop name="strokeWidth" type="number" description="New stroke width of the shape" />
+                  <prop name="rotation" type="number" description="New rotation angle of the shape in degrees" />
+              </Tool>
+              <Tool
+                  name="clear_canvas"
+                  description="Clears canvas and deletes all objects"
+                  onCall={() => {
+                      clearCanvas();
+                  }}
+              />
+
+              <Tool
+                  name="move_object_to_layer"
+                  description="Moves an object to a specific layer by its index"
+                  onCall={(event) => {
+                      const { index, layer } = event.detail;
+                      moveObjectToLayer(index, layer);
+                  }}
+              >
+                  <prop name="id" type="number" required description="ID of the object to move" />
+                  <prop name="layer" type="number" required description="Layer number to move the object to" />
+              </Tool>
+              <Tool
+                  name="generate_ai_image"
+                  description="Generates an AI image based on a prompt and adds it to the canvas"
+                  onCall={(event) => {
+                      const { prompt, top, left, width, height, rotation } = event.detail;
+                      handleGenerateAiImage(prompt, top, left, width, height, rotation);
+                  }}
+              >
+                  <prop name="prompt" type="string" required description="AI image generation prompt" />
+                  <prop name="top" type="number" required description="Top position of the image on the canvas" />
+                  <prop name="left" type="number" required description="Left position of the image on the canvas" />
+                  <prop name="width" type="number" required description="Width of the image on the canvas" />
+                  <prop name="height" type="number" required description="Height of the image on the canvas" />
+                  <prop name="rotation" type="number" description="Rotation angle in degrees (optional)" />
+              </Tool>
+
+              <context name="available_filter_presets">
+                  {filterPresets.map((preset) => preset.name).join(", ")}
+              </context>
+
+              <Tool name="edit_image" description={"Edit an image on the canvas by its ID and the desired properties"} onCall={(event) => {
+                  console.log("Edit image id:", event.detail.id)
+                  if (fabricCanvas) {
+                      editImage(event.detail);
+                  }
+              }}>
+                  <prop name="id" type="number" required description="ID of the image to edit, the id stays the same after editing, take the same id" />
+                  <prop name="left" type="number" description="New X position of the image" />
+                  <prop name="top" type="number" description="New Y position of the image" />
+                  <prop name="width" type="number" description="New width of the image" />
+                  <prop name="height" type="number" description="New height of the image" />
+                  <prop name="rotation" type="number" description="Rotation angle in degrees" />
+                  <prop name="brightness" type="number" description="Brightness adjustment (0-1)" />
+                  <prop name="contrast" type="number" description="Contrast adjustment in percentage (0-1)" />
+                  <prop name="saturation" type="number" description="Saturation adjustment in percentage (0-1)" />
+                  <prop name="blur" type="number" description="Blur effect in percentage (0-1)" />
+                  <prop name="hue" type="number" description="Hue rotation in radiant (-π to π)" />
+                  <prop name="filter_preset" type="string" description="Custom filter strings" />
+              </Tool>
+          </>
+      );
+  }
 
   return (
     <div className="flex flex-col">
@@ -706,212 +925,7 @@ export const EnhancedEditorCanvas = ({
         onDrop={handleDrop}
         onDragOver={handleDragOver}
       >
-          <context name="Canvas Size">
-              {width} x {height}
-          </context>
-          <context name="Canvas Objects">
-            {canvasObjectsString}
-          </context>
-          <Tool
-              name="add_text"
-              description="Add a text box to the canvas with the specified properties"
-              onCall={(event) => {
-                  const {
-                      text, left, top, width,
-                      rotation, fontsize, color,
-                      fontAlignment, bold, italic,
-                      underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
-                  } = event.detail;
-                  if (fabricCanvas) {
-                      addTextBox(
-                          text, left, top, width,
-                          rotation, fontsize, color,
-                          fontAlignment, bold, italic,
-                          underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
-                      );
-                  }
-              }}
-          >
-              <prop name="text" type="string" required description="The text that should be added" />
-              <prop name="left" type="number" required description="X-Position of the new text" />
-              <prop name="top" type="number" required description="Y-Position of the new text" />
-              <prop name="width" type="number" required description="Width of the textbox" />
-              <prop name="rotation" type="number" description="Rotation angle of the textbox in degrees" />
-              <prop name="fontsize" type="number" description="Font size of the textbox" />
-              <prop name="color" type="string" description="Text color of the new text in the format #rrggbb" />
-              <prop name="fontAlignment" type="string" description="The text alignment of the new text. Can be one of 'left', 'center', or 'right'" />
-              <prop name="bold" type="boolean" description="Whether the text should be bold" />
-              <prop name="italic" type="boolean" description="Whether the text should be italic" />
-              <prop name="underlined" type="boolean" description="Whether the text should be underlined" />
-              <prop name="strikeThrough" type="boolean" description="Whether the text should be striked through" />
-              <prop name="fontfamily" type="string" description="The font family of the text" />
-              <prop name="strokeColor" type="string" description="The stroke color of the text" />
-              <prop name="strokeWidth" type="number" description="The width of the stroke of the text" />
-          </Tool>
-
-          <Tool name="edit_text"
-                description="Edit text on the canvas identified with the id"
-                onCall={(event) => {
-                    const {
-                        id, text, left, top, width,
-                        rotation, fontsize, color,
-                        fontAlignment, bold, italic,
-                        underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
-                    } = event.detail;
-                    console.log("Edit id:", id)
-                    if (fabricCanvas) {
-                        editTextBox(
-                            id, text, left, top, width,
-                            rotation, fontsize, color,
-                            fontAlignment, bold, italic,
-                            underlined, strikeThrough, fontfamily, strokeColor, strokeWidth
-                        );
-                    }
-                }}
-          >
-              <prop name="id" type="number" required description="ID of the to changing text box, the id stays the same after editing, take the same id" />
-              <prop name="text" type="string" description="New text content" />
-              <prop name="left" type="number" description="New X-Position" />
-              <prop name="top" type="number" description="New Y-Position" />
-              <prop name="width" type="number" description="New width of the textbox" />
-              <prop name="rotation" type="number" description="New rotation angle of the textbox" />
-              <prop name="fontsize" type="number" description="New fontsize of the textbox" />
-              <prop name="color" type="string" description="New text color of the textbox" />
-              <prop name="fontAlignment" type="string" description="The new alignment of the text. Can be either 'left', 'center', or 'right'." />
-              <prop name="bold" type="boolean" description="Whether the text should be bold" />
-              <prop name="italic" type="boolean" description="Whether the text should be italic" />
-              <prop name="underlined" type="boolean" description="Whether the text should be underlined" />
-              <prop name="strikeThrough" type="boolean" description="Whether the text should be striked through" />
-              <prop name="fontfamily" type="string" description="The new font family of the text" />
-              <prop name="strokeWidth" type="number" description="The new stroke width of the text" />
-              <prop name="strokeColor" type="string" description="The new color of the stroke of the text" />
-          </Tool>
-
-          <Tool
-              name="add_shape"
-              description="Adds a shape (rectangle, circle, triangle or line) to the canvas with the specified properties"
-              onCall={(event) => {
-                  const {
-                      shape, left, top, width, height,
-                      fillColor, strokeWidth, strokeColor
-                  } = event.detail;
-                  if (fabricCanvas) {
-                      addShape(
-                          shape, left, top, width, height,
-                          fillColor, strokeWidth, strokeColor
-                      );
-                  }
-              }}
-          >
-              <prop name="shape" type="string" required description="Type of the shape: 'rectangle', 'circle', 'triangle', or 'line'" />
-              <prop name="left" type="number" required description="X-Position of the shape" />
-              <prop name="top" type="number" required description="Y-Position of the shape" />
-              <prop name="width" type="number" required description="Width of the shape" />
-              <prop name="height" type="number" required description="Height of the shape" />
-              <prop name="fillColor" type="string" required description="Fill color of the shape" />
-              <prop name="strokeWidth" type="number" description="Stroke width of the shape" />
-              <prop name="strokeColor" type="string" description="Color of the stroke of the shape" />
-          </Tool>
-
-            <Tool name="remove_objects" description="Remove objects from the canvas by giving the ids as a list" onCall={(event) => {
-                const { ids } = event.detail;
-                if (fabricCanvas) {
-                  removeObjects(ids);
-                }
-            }}>
-                <array name="ids" required>
-                    <dict>
-                        <prop name="id" type="number" required description="ID of the object to remove" />
-                    </dict>
-                </array>
-            </Tool>
-
-          <Tool
-            name="edit_shape"
-            description="Edit a shape on the canvas by its ID and the desired properties"
-            onCall={(event) => {
-              const {
-                id, left, top, width, height,
-                fillColor, strokeColor, strokeWidth, rotation
-              } = event.detail;
-
-              console.log("Edit id:", id)
-              if (fabricCanvas) {
-                editShape(
-                  id, left, top, width, height,
-                  fillColor, strokeColor, strokeWidth, rotation,
-                );
-              }
-            }}
-          >
-            <prop name="id" type="number" required description="ID of the to change shape, the id stays the same after editing, take the same id when editing an object multiple times" />
-            <prop name="left" type="number" description="New X-Position" />
-            <prop name="top" type="number" description="New Y-Position" />
-            <prop name="width" type="number" description="New Width (only for rectangles, circles, and triangles)" />
-            <prop name="height" type="number" description="New Height (only for rectangles, circles, and triangles)" />
-            <prop name="fillColor" type="string" description="New fill color of the shape" />
-            <prop name="strokeColor" type="string" description="New stroke color of the shape" />
-            <prop name="strokeWidth" type="number" description="New stroke width of the shape" />
-            <prop name="rotation" type="number" description="New rotation angle of the shape in degrees" />
-          </Tool>
-          <Tool
-              name="clear_canvas"
-              description="Clears canvas and deletes all objects"
-              onCall={() => {
-                  clearCanvas();
-              }}
-          />
-
-          <Tool
-              name="move_object_to_layer"
-                description="Moves an object to a specific layer by its index"
-                onCall={(event) => {
-                    const { index, layer } = event.detail;
-                    moveObjectToLayer(index, layer);
-                }}
-            >
-                <prop name="id" type="number" required description="ID of the object to move" />
-                <prop name="layer" type="number" required description="Layer number to move the object to" />
-            </Tool>
-          <Tool
-              name="generate_ai_image"
-              description="Generates an AI image based on a prompt and adds it to the canvas"
-                onCall={(event) => {
-                    const { prompt, top, left, width, height, rotation } = event.detail;
-                    handleGenerateAiImage(prompt, top, left, width, height, rotation);
-                }}
-            >
-                <prop name="prompt" type="string" required description="AI image generation prompt" />
-                <prop name="top" type="number" required description="Top position of the image on the canvas" />
-                <prop name="left" type="number" required description="Left position of the image on the canvas" />
-                <prop name="width" type="number" required description="Width of the image on the canvas" />
-                <prop name="height" type="number" required description="Height of the image on the canvas" />
-                <prop name="rotation" type="number" description="Rotation angle in degrees (optional)" />
-            </Tool>
-
-          <context name="available_filter_presets">
-              {filterPresets.map((preset) => preset.name).join(", ")}
-          </context>
-
-          <Tool name="edit_image" description={"Edit an image on the canvas by its ID and the desired properties"} onCall={(event) => {
-                console.log("Edit image id:", event.detail.id)
-                if (fabricCanvas) {
-                    editImage(event.detail);
-                }
-          }}>
-            <prop name="id" type="number" required description="ID of the image to edit, the id stays the same after editing, take the same id" />
-            <prop name="left" type="number" description="New X position of the image" />
-            <prop name="top" type="number" description="New Y position of the image" />
-            <prop name="width" type="number" description="New width of the image" />
-            <prop name="height" type="number" description="New height of the image" />
-              <prop name="rotation" type="number" description="Rotation angle in degrees" />
-            <prop name="brightness" type="number" description="Brightness adjustment (0-1)" />
-            <prop name="contrast" type="number" description="Contrast adjustment in percentage (0-1)" />
-            <prop name="saturation" type="number" description="Saturation adjustment in percentage (0-1)" />
-            <prop name="blur" type="number" description="Blur effect in percentage (0-1)" />
-            <prop name="hue" type="number" description="Hue rotation in radiant (-π to π)" />
-            <prop name="filter_preset" type="string" description="Custom filter strings" />
-          </Tool>
+          {isTabActive && buildTools()}
 
 
         <canvas
