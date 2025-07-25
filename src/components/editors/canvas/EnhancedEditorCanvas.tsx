@@ -75,8 +75,10 @@ export const EnhancedEditorCanvas = ({
             fabricImg.set({
                 left: left,
                 top: top,
-                angle: rotation || 0,
             });
+            if (rotation !== undefined) {
+                fabricImg.rotate(rotation);
+            }
             fabricImg.setCoords();
             fabricCanvas.renderAll();
         })
@@ -133,7 +135,7 @@ export const EnhancedEditorCanvas = ({
         }
 
         if (rotation !== undefined) {
-          textBox.set("angle", rotation);
+            textBox.rotate(rotation);
         }
 
         if (fontsize !== undefined) {
@@ -283,7 +285,6 @@ export const EnhancedEditorCanvas = ({
     strokeColor?: string,
     strokeWidth?: number,
     rotation?: number,
-    radius?: number,
   ) => {
     if (!fabricCanvas || !fabricObjects[index - 1]) {
       toast.error("Shape not found.");
@@ -299,15 +300,20 @@ export const EnhancedEditorCanvas = ({
       if (fillColor !== undefined) obj.set("fill", fillColor);
       if (strokeColor !== undefined) obj.set("stroke", strokeColor);
       if (strokeWidth !== undefined) obj.set("strokeWidth", strokeWidth);
-      if (rotation !== undefined) obj.set("angle", rotation);
+      if (rotation !== undefined) {
+            obj.rotate(rotation);
+      }
     } else if (obj.isType("circle")) {
       if (left !== undefined) obj.set("left", left);
       if (top !== undefined) obj.set("top", top);
-      if (radius !== undefined) obj.set("radius", radius);
+    if (width !== undefined) obj.scaleToWidth(width);
+    if (height !== undefined) obj.scaleToHeight(height);
       if (fillColor !== undefined) obj.set("fill", fillColor);
       if (strokeColor !== undefined) obj.set("stroke", strokeColor);
       if (strokeWidth !== undefined) obj.set("strokeWidth", strokeWidth);
-      if (rotation !== undefined) obj.set("angle", rotation);
+      if (rotation !== undefined) {
+            obj.rotate(rotation);
+      }
     } else if (obj.isType("line")) {
         if (left !== undefined) obj.set("x1", left);
         if (top !== undefined) obj.set("y1", top);
@@ -365,9 +371,15 @@ export const EnhancedEditorCanvas = ({
 
     if (left !== undefined) img.set("left", left);
     if (top !== undefined) img.set("top", top);
-    if (width !== undefined) img.set("width", width);
-    if (height !== undefined) img.set("height", height);
-    if (rotation !== undefined) img.set("angle", rotation);
+    if (width !== undefined) {
+        img.scaleToWidth(width);
+    }
+    if (height !== undefined) {
+        img.scaleToHeight(height);
+    }
+    if (rotation !== undefined) {
+        img.rotate(rotation);
+    }
     img.setCoords();
 
     if (brightness !== undefined) {
@@ -674,7 +686,7 @@ export const EnhancedEditorCanvas = ({
           return `Circle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
         } else if (obj.isType("image")) {
           const imageDescription = obj?.["imageDescription"] || "No description";
-          return `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) with description: "${imageDescription}"`;
+          return `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}), rotation: ${obj.angle}°, description: ${imageDescription}"`;
         } else if (obj.isType("triangle")) {
           return `Triangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
         } else if (obj.isType("line")) {
