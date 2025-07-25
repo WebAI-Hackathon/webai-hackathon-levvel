@@ -170,7 +170,7 @@ export const EnhancedEditorCanvas = ({
   }, [fabricCanvas, fabricObjects]);
 
 
-  const add_shape = useCallback((shape: "rectangle" | "circle" | "triangle" | "line", left: number, top: number, width: number,
+  const addShape = useCallback((shape: "rectangle" | "circle" | "triangle" | "line", left: number, top: number, width: number,
                   height: number, fillColor?: string, strokeWidth?: number, strokeColor?: string) => {
         if (fabricCanvas) {
 
@@ -252,7 +252,7 @@ export const EnhancedEditorCanvas = ({
     }
   }, [fabricCanvas, fabricObjects]);
 
-  const edit_shape = useCallback((
+  const editShape = useCallback((
     index: number,
     left?: number,
     top?: number,
@@ -674,7 +674,7 @@ export const EnhancedEditorCanvas = ({
                       fillColor, strokeWidth, strokeColor
                   } = event.detail;
                   if (fabricCanvas) {
-                      add_shape(
+                      addShape(
                           shape, left, top, width, height,
                           fillColor, strokeWidth, strokeColor
                       );
@@ -715,7 +715,7 @@ export const EnhancedEditorCanvas = ({
 
               console.log("Edit id:", id)
               if (fabricCanvas) {
-                edit_shape(
+                editShape(
                   id, left, top, width, height,
                   fillColor, strokeColor, strokeWidth, rotation,
                 );
