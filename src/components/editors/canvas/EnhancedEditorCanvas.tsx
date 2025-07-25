@@ -106,7 +106,7 @@ export const EnhancedEditorCanvas = ({
     const addTextBox = useCallback((text: string, left: number, top: number, width: number,
                                   rotation?: number, fontsize?: number, color?: string,
                                   fontAlignment?: "left" | "center" | "right", bold?: boolean, italic?: boolean,
-                                  underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, borderColor?: string, strokeWidth?: number) => {
+                                  underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, strokeColor?: string, strokeWidth?: number) => {
       const textbox = new Textbox(text, {
           left: left,
           top: top,
@@ -114,7 +114,7 @@ export const EnhancedEditorCanvas = ({
           fontSize: fontsize || fontSize,
           fontFamily: fontfamily || "Arial",
           width: width,
-          borderColor: borderColor || activeColor,
+          stroke: strokeColor || activeColor,
           textAlign: fontAlignment || "center",
           linethrough: strikeThrough || false,
           underline: underlined || false,
@@ -132,7 +132,7 @@ export const EnhancedEditorCanvas = ({
   const editTextBox = useCallback((index: number, text?: string, left?: number, top?: number, width?: number,
                                    rotation?: number, fontsize?: number, color?: string,
                                    fontAlignment?: "left" | "center" | "right", bold?: boolean, italic?: boolean,
-                                   underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, borderColor?: string, strokeWidth?: number, strokeColor?: string) => {
+                                   underlined?: boolean, strikeThrough?: boolean, fontfamily?: string, strokeColor?: string, strokeWidth?: number) => {
     if (fabricCanvas && fabricObjects[index - 1] && fabricObjects[index - 1].isType("textbox")) {
       const textBox = fabricObjects[index - 1];
 
@@ -188,16 +188,12 @@ export const EnhancedEditorCanvas = ({
           textBox.set("fontFamily", fontfamily);
         }
 
-        if (borderColor !== undefined) {
-          textBox.set("stroke", borderColor);
+        if (strokeColor !== undefined) {
+          textBox.set("stroke", strokeColor);
         }
 
         if (strokeWidth !== undefined) {
           textBox.set("strokeWidth", strokeWidth);
-        }
-
-        if (strokeColor !== undefined) {
-          textBox.set("stroke", strokeColor);
         }
 
         // Update the object in the fabricObjects array
