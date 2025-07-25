@@ -675,27 +675,27 @@ export const EnhancedEditorCanvas = ({
       filteredObjects.map((obj, index) => {
         if (obj.isType("textbox")) {
           const textObj = obj as Textbox;
-          return `Text Object id = ${index + 1}: "${textObj.text}" at (X: ${obj.left}, Y: ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) color: ${textObj.fill}, fontSize: ${textObj.fontSize}, fontFamily: ${textObj.fontFamily}, rotation: ${textObj.angle}°`;
+          return `Text Object id = ${index + 1}: "${textObj.text}" at (X: ${obj.left}, Y: ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) color: ${textObj.fill}, fontSize: ${textObj.fontSize}, fontFamily: ${textObj.fontFamily}, rotation: ${textObj.angle}°. ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
         } else if (obj.isType('rect')) {
-          return `Rectangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
+          return `Rectangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°. ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
         } else if (obj.isType('circle')) {
-          return `Circle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
+          return `Circle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°. ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
         } else if (obj.isType("image")) {
             const image = obj as FabricImage;
           const imageDescription = obj?.["imageDescription"] || "No description";
-          let outStr = `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}), rotation: ${obj.angle}°"`;
+          let outStr = `Image Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}), rotation: ${obj.angle}°". ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
             if (image.filters && image.filters.length > 0) {
                 outStr += `, filters: ${image.filters.map(f => JSON.stringify(f.toJSON())).join(", ")}`;
             }
             outStr += `, description: "${imageDescription}"`;
             return outStr;
         } else if (obj.isType("triangle")) {
-          return `Triangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°`;
+          return `Triangle Object id = ${index + 1} at (${obj.left}, ${obj.top}) with size (Width: ${obj.width}, Height: ${obj.height}) fill: ${obj.fill}, stroke: ${obj.stroke}, strokeWidth: ${obj.strokeWidth}, rotation: ${obj.angle}°. ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
         } else if (obj.isType("line")) {
           const line = obj as Line;
-          return `Line Object id = ${index + 1} from (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2}) stroke: ${line.stroke}, strokeWidth: ${line.strokeWidth}, rotation: ${line.angle}°`;
+          return `Line Object id = ${index + 1} from (${line.x1}, ${line.y1}) to (${line.x2}, ${line.y2}) stroke: ${line.stroke}, strokeWidth: ${line.strokeWidth}, rotation: ${line.angle}°. ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
         } else {
-          return `Object id = ${index + 1} of type ${obj.type}`;
+          return `Object id = ${index + 1} of type ${obj.type}. ${obj === fabricCanvas?.getActiveObject() ? " (The user has selected this object)": ""}`;
         }
       }).join("\n");
 
